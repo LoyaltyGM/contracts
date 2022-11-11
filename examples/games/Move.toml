@@ -3,7 +3,7 @@ name = "Games"
 version = "0.0.1"
 
 [dependencies]
-Sui = { local = "../../../crates/sui-framework" }
+Sui = { local = "../../../sui/crates/sui-framework" }
 
 [addresses]
 games = "0x0"

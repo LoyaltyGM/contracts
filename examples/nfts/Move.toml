@@ -3,7 +3,7 @@ name = "NFTs"
 version = "0.0.1"
 
 [dependencies]
-Sui = { local = "../../../crates/sui-framework" }
+Sui = { local = "../../../sui/crates/sui-framework" }
 
 [addresses]
 nfts = "0x0"
