@@ -1,4 +1,4 @@
-module nfts::loyalty_nft {
+module loyalty_gm::loyalty_nft {
     use sui::object::{Self, UID};
     use std::string::{Self, String};
     use sui::transfer;
