@@ -11,6 +11,9 @@ module nfts::loyalty_nft {
     const CURRENT_POINTS: u128 = 0;
     const ELevel: u64 = 0;
 
+    // Belongs to the creator
+    struct LoyaltyManagerCap has key, store { id: UID }
+
     /// Loyalty NFT.
     struct LoyaltySystemNFT has key, store {
         id: UID,
@@ -29,6 +32,9 @@ module nfts::loyalty_nft {
         // pointsToNextLvl: u128,
     }
 
+    fun init(ctx: &mut TxContext){
+        transfer::transfer(LoyaltyManagerCap { id: object::new(ctx) }, tx_context::sender(ctx));
+    }
 
     /// Create a new devnet_nft
     public entry fun mint(
