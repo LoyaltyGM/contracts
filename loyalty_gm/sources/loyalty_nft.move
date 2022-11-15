@@ -4,17 +4,26 @@ module loyalty_gm::loyalty_nft {
     use sui::transfer;
     use sui::tx_context::{Self, TxContext};
     use sui::event::{emit};
+    // use sui::dynamic_field;
 
-    // Mint Level
+    // ======== Constants =========
+
     const BASIC_LEVEL: u8 = 0;
     const CURRENT_POINTS: u128 = 0;
+    const LIST_ID: u8 = 0;
 
-    // Error codes
+    // ======== Error codes =========
+
     const ELevel: u64 = 0;
     const ETooManyMint: u64 = 1;
+    const EAdminOnly: u64 = 2;
 
-    // Belongs to the creator
-    struct LoyaltyManagerCap has key, store { id: UID }
+    // ======== Structs =========
+
+    struct AdminCap has key, store { 
+        id: UID,
+        loyalty_system: ID
+    }
 
     struct LoyaltySystem has key {
         id: UID,
@@ -33,11 +42,12 @@ module loyalty_gm::loyalty_nft {
     /// Loyalty NFT.
     struct LoyaltyToken has key, store {
         id: UID,
+        loyalty_system: ID,
         name: String,
         description: String,
         url: String,
 
-        // Level of nft [1-100]
+        // Level of nft [0-255]
         level: u8,
         // Expiration timestamp (UNIX time) - app specific
         currentPointsXP: u128,
@@ -64,50 +74,6 @@ module loyalty_gm::loyalty_nft {
         name: string::String,
     }
 
-    // ======== Admin Functions =========
-
-    public entry fun create_loyalty_system(
-        name: vector<u8>, 
-        description: vector<u8>, 
-        url: vector<u8>,
-        max_supply: u64,
-        ctx: &mut TxContext,
-    ){
-        let loyalty_system = LoyaltySystem { 
-            id: object::new(ctx),
-            name: string::utf8(name),
-            description: string::utf8(description),
-            url: string::utf8(url),
-            issued_counter: 0,
-            max_supply: max_supply,
-        };
-        let sender = tx_context::sender(ctx);
-
-        emit(CreateLoyaltySystemEvent {
-            object_id: object::uid_to_inner(&loyalty_system.id),
-            creator: sender,
-            name: loyalty_system.name,
-        });
-        transfer::transfer(LoyaltyManagerCap { id: object::new(ctx) }, sender);
-        transfer::share_object(loyalty_system)
-    }
-
-    public entry fun update_loyalty_system_name(_: &LoyaltyManagerCap, loyalty_system: &mut LoyaltySystem, new_name: vector<u8> ){
-        loyalty_system.name = string::utf8(new_name);
-    }
-
-    public entry fun update_loyalty_system_description(_: &LoyaltyManagerCap, loyalty_system: &mut LoyaltySystem, new_description: vector<u8> ){
-        loyalty_system.description = string::utf8(new_description);
-    }
-
-    public entry fun update_loyalty_system_url(_: &LoyaltyManagerCap, loyalty_system: &mut LoyaltySystem, new_url: vector<u8> ){
-        loyalty_system.url = string::utf8(new_url);
-    }
-
-    public entry fun update_loyalty_system_max_supply(_: &LoyaltyManagerCap, loyalty_system: &mut LoyaltySystem, new_max_supply: u64 ){
-        loyalty_system.max_supply = new_max_supply;
-    }
-
     // ======= Public functions =======
 
     /// Create a new devnet_nft
@@ -121,6 +87,7 @@ module loyalty_gm::loyalty_nft {
 
         let nft = LoyaltyToken {
             id: object::new(ctx),
+            loyalty_system: object::uid_to_inner(&loyalty_system.id),
             name: loyalty_system.name,
             description: loyalty_system.description,
             url: loyalty_system.url,
@@ -137,11 +104,6 @@ module loyalty_gm::loyalty_nft {
         });
 
         transfer::transfer(nft, sender);
-    }
-
-    public entry fun update_lvl(nft: &mut LoyaltyToken, new_lvl: u8, _: &mut TxContext) {
-        assert!(nft.level + 1 == new_lvl, ELevel);
-        nft.level = new_lvl
     }
 
     public fun current_lvl(nft: &mut LoyaltyToken): &u8 {
@@ -168,8 +130,66 @@ module loyalty_gm::loyalty_nft {
         &loyalty_system.url
     }
 
+    public entry fun create_loyalty_system(
+        name: vector<u8>, 
+        description: vector<u8>, 
+        url: vector<u8>,
+        max_supply: u64,
+        ctx: &mut TxContext,
+    ){
+        let loyalty_system = LoyaltySystem { 
+            id: object::new(ctx),
+            name: string::utf8(name),
+            description: string::utf8(description),
+            url: string::utf8(url),
+            issued_counter: 0,
+            max_supply: max_supply,
+        };
+        let sender = tx_context::sender(ctx);
+
+        emit(CreateLoyaltySystemEvent {
+            object_id: object::uid_to_inner(&loyalty_system.id),
+            creator: sender,
+            name: loyalty_system.name,
+        });
+        transfer::transfer(AdminCap { id: object::new(ctx), loyalty_system: object::uid_to_inner(&loyalty_system.id) }, sender);
+        transfer::share_object(loyalty_system);
+        // dynamic_field::add(LIST_ID, loyalty_system.id, loyalty_system);
+    }
+
+    // ======== Admin Functions =========
+
+    public entry fun update_lvl(admin_cap: &AdminCap, nft: &mut LoyaltyToken, new_lvl: u8, _: &mut TxContext) {
+        assert!(object::borrow_id(nft) == &admin_cap.loyalty_system, EAdminOnly);
+        assert!(nft.level + 1 == new_lvl, ELevel);
+        nft.level = new_lvl
+    }
+
+    public entry fun update_loyalty_system_name(admin_cap: &AdminCap, loyalty_system: &mut LoyaltySystem, new_name: vector<u8> ){
+        check_admin(admin_cap, loyalty_system);
+        loyalty_system.name = string::utf8(new_name);
+    }
+
+    public entry fun update_loyalty_system_description(admin_cap: &AdminCap, loyalty_system: &mut LoyaltySystem, new_description: vector<u8> ){
+        check_admin(admin_cap, loyalty_system);
+        loyalty_system.description = string::utf8(new_description);
+    }
+
+    public entry fun update_loyalty_system_url(admin_cap: &AdminCap, loyalty_system: &mut LoyaltySystem, new_url: vector<u8> ){
+        check_admin(admin_cap, loyalty_system);
+        loyalty_system.url = string::utf8(new_url);
+    }
+
+    public entry fun update_loyalty_system_max_supply(admin_cap: &AdminCap, loyalty_system: &mut LoyaltySystem, new_max_supply: u64 ){
+        check_admin(admin_cap, loyalty_system);
+        loyalty_system.max_supply = new_max_supply;
+    }
+
     // ======= Private and Utility functions =======
 
+    fun check_admin(admin_cap: &AdminCap, system: &LoyaltySystem) {
+        assert!(object::borrow_id(system) == &admin_cap.loyalty_system, EAdminOnly);
+    }
 
 }
 
