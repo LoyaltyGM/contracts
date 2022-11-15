@@ -67,7 +67,7 @@ module loyalty_gm::loyalty_nft {
         name: string::String,
     }
 
-    struct MintToken has copy, drop {
+    struct MintTokenEvent has copy, drop {
         object_id: ID,
         loyalty_system:ID,
         minter: address,
@@ -96,7 +96,7 @@ module loyalty_gm::loyalty_nft {
         };
         let sender = tx_context::sender(ctx);
 
-        emit(MintToken {
+        emit(MintTokenEvent {
             object_id: object::uid_to_inner(&nft.id),
             loyalty_system: object::id(loyalty_system),
             minter: sender,
@@ -160,7 +160,7 @@ module loyalty_gm::loyalty_nft {
     // ======== Admin Functions =========
 
     public entry fun update_lvl(admin_cap: &AdminCap, nft: &mut LoyaltyToken, new_lvl: u8, _: &mut TxContext) {
-        assert!(object::borrow_id(nft) == &admin_cap.loyalty_system, EAdminOnly);
+        assert!(&nft.loyalty_system == &admin_cap.loyalty_system, EAdminOnly);
         assert!(nft.level + 1 == new_lvl, ELevel);
         nft.level = new_lvl
     }
