@@ -3,7 +3,7 @@ module loyalty_gm::loyalty_store {
 
     use sui::object::{Self, UID, ID};
     use sui::transfer;
-    use sui::tx_context::{TxContext};
+    use sui::tx_context::{Self, TxContext};
     use sui::dynamic_object_field as dof;
     // use sui::table::{Self, Table};
 
@@ -16,6 +16,7 @@ module loyalty_gm::loyalty_store {
         id: UID,
         record_number: u64,
         loyalty_system: ID,
+        creator: address,
     }
 
     fun init(ctx: &mut TxContext) {
@@ -44,7 +45,8 @@ module loyalty_gm::loyalty_store {
         let record = LoyaltyStoreRecord {
             id: object::new(ctx),
             record_number: n,
-            loyalty_system: object_id
+            loyalty_system: object_id,
+            creator: tx_context::sender(ctx),
         };
 
         dof::add(&mut store.id, n, record);
