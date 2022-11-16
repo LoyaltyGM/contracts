@@ -7,8 +7,8 @@ module loyalty_gm::loyalty_system {
     use sui::url::{Self, Url};
     use sui::tx_context::{Self, TxContext};
     use sui::event::{emit};
-    use loyalty_gm::loyalty_store::{Self, LoyaltyStore};
-    // use sui::table::{Table};
+    use loyalty_gm::loyalty_store::{Self, LoyaltyStoreRecord};
+    use sui::object_table::{ObjectTable};
 
     // ======== Constants =========
 
@@ -57,7 +57,7 @@ module loyalty_gm::loyalty_system {
         description: vector<u8>, 
         url: vector<u8>,
         max_supply: u64,
-        store: &mut LoyaltyStore,
+        store: &mut ObjectTable<u64, LoyaltyStoreRecord>,
         ctx: &mut TxContext,
     ) {
         let loyalty_system = LoyaltySystem { 

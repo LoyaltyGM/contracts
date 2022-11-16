@@ -4,13 +4,7 @@ module loyalty_gm::loyalty_store {
     use sui::object::{Self, UID, ID};
     use sui::transfer;
     use sui::tx_context::{Self, TxContext};
-    use sui::dynamic_object_field as dof;
-    // use sui::table::{Self, Table};
-
-    struct LoyaltyStore has key {
-        id: UID,
-        total_records: u64
-    }
+    use sui::object_table::{Self, ObjectTable};
 
     struct LoyaltyStoreRecord has key, store {
         id: UID,
@@ -20,27 +14,12 @@ module loyalty_gm::loyalty_store {
     }
 
     fun init(ctx: &mut TxContext) {
-        // Table implenemtation
-        // let table = table::new<u64, LoyaltyStoreRecord>(ctx);
-        // transfer::share_object(table)
-
-        transfer::share_object(LoyaltyStore {
-            id: object::new(ctx),
-            total_records: 0,
-        })
+        let table = object_table::new<u64, LoyaltyStoreRecord>(ctx);
+        transfer::share_object(table)
     }
 
-    public(friend) fun new_record(store: &mut LoyaltyStore, object_id: ID, ctx: &mut TxContext) {  
-        // Table implementation
-        // let n = table::length(table) + 1;
-        // let record = LoyaltyStoreRecord {
-        //     loyalty_system: object_id,
-        // };
-        // table::add(table, n, record);
-
-        let n = store.total_records + 1;
-
-        store.total_records = n;
+    public(friend) fun new_record(store: &mut ObjectTable<u64, LoyaltyStoreRecord>, object_id: ID, ctx: &mut TxContext) {  
+        let n = object_table::length(store);
 
         let record = LoyaltyStoreRecord {
             id: object::new(ctx),
@@ -49,14 +28,14 @@ module loyalty_gm::loyalty_store {
             creator: tx_context::sender(ctx),
         };
 
-        dof::add(&mut store.id, n, record);
+        object_table::add(store, n, record);
     }
 
-    public fun get_total_records(store: &LoyaltyStore): u64 {
-        store.total_records
+    public fun get_total_records(store: &ObjectTable<u64, LoyaltyStoreRecord>): u64 {
+        object_table::length(store)
     }
 
-    public fun get_record_by_key(store: &LoyaltyStore, key: u64): &LoyaltyStoreRecord {
-        dof::borrow(&store.id, key)
+    public fun get_record_by_key(store: &ObjectTable<u64, LoyaltyStoreRecord>, key: u64): &LoyaltyStoreRecord {
+        object_table::borrow(store, key)
     }
 }
