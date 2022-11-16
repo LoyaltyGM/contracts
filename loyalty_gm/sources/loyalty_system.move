@@ -7,8 +7,8 @@ module loyalty_gm::loyalty_system {
     use sui::url::{Self, Url};
     use sui::tx_context::{Self, TxContext};
     use sui::event::{emit};
-    use sui::table::{Table};
-    use loyalty_gm::loyalty_store::{Self, LoyaltyStoreRecord};
+    use loyalty_gm::loyalty_store::{Self, LoyaltyStore};
+    // use sui::table::{Table};
 
     // ======== Constants =========
 
@@ -57,7 +57,7 @@ module loyalty_gm::loyalty_system {
         description: vector<u8>, 
         url: vector<u8>,
         max_supply: u64,
-        table: &mut Table<u64, LoyaltyStoreRecord>,
+        store: &mut LoyaltyStore,
         ctx: &mut TxContext,
     ) {
         let loyalty_system = LoyaltySystem { 
@@ -76,7 +76,7 @@ module loyalty_gm::loyalty_system {
             name: loyalty_system.name,
         });
         transfer::transfer(AdminCap { id: object::new(ctx), loyalty_system: object::uid_to_inner(&loyalty_system.id) }, sender);
-        loyalty_store::new_record(table, object::uid_to_inner(&loyalty_system.id));
+        loyalty_store::new_record(store, object::uid_to_inner(&loyalty_system.id), ctx);
         transfer::share_object(loyalty_system);
     }
 
