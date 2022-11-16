@@ -51,4 +51,12 @@ module loyalty_gm::loyalty_store {
 
         dof::add(&mut store.id, n, record);
     }
+
+    public fun get_total_records(store: &LoyaltyStore): u64 {
+        store.total_records
+    }
+
+    public fun get_record_by_key(store: &LoyaltyStore, key: u64): &LoyaltyStoreRecord {
+        dof::borrow(&store.id, key)
+    }
 }
