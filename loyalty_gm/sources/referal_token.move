@@ -52,9 +52,15 @@ module loyalty_gm::referal_token {
 
     // EVENT MINT
     struct MintTokenEvent has copy, drop {
-        object_id: ID,
+        token_id: ID,
         minter: address,
         name: string::String,
+    }
+
+    struct ClaimExpEvent has copy, drop {
+        token_id: ID,
+        claimer: address,
+        claimed_exp: u64,
     }
 
     // ======= INITIALIZATION =======
@@ -75,6 +81,12 @@ module loyalty_gm::referal_token {
         let claimable_exp = get_data_exp(store, sender);
 
         assert!(claimable_exp > 0, ENoClaimableExp);
+
+        emit(ClaimExpEvent {
+            token_id: object::id(token),
+            claimer: sender,
+            claimed_exp: claimable_exp,
+        });
 
         reset_data_exp(store, sender);
 
@@ -125,7 +137,7 @@ module loyalty_gm::referal_token {
         };
         
         emit(MintTokenEvent {
-            object_id: object::id(&nft),
+            token_id: object::id(&nft),
             minter: sender,
             name: nft.name,
         });
