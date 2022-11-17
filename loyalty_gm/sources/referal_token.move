@@ -22,6 +22,7 @@ module loyalty_gm::referal_token {
 
     const ENotUniqueAddress: u64 = 0;
     const EInvalidReferal: u64 = 1;
+    const ENoClaimableExp: u64 = 2;
 
     // ======== Structs =========
 
@@ -73,12 +74,14 @@ module loyalty_gm::referal_token {
         let sender = tx_context::sender(ctx);
         let claimable_exp = get_data_exp(store, sender);
 
+        assert!(claimable_exp > 0, ENoClaimableExp);
+
         reset_data_exp(store, sender);
 
         update_token_ref_counter(token);
         update_token_exp(claimable_exp, token);
     }
-    
+
     public entry fun mint(
         store: &mut ObjectTable<address, UserData>,
         ctx: &mut TxContext
