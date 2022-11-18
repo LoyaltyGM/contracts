@@ -1,0 +1,9 @@
+[package]
+name = "ReferalSystem"
+version = "0.0.1"
+
+[dependencies]
+Sui = { local = "../../sui/crates/sui-framework" }
+
+[addresses]
+referal_system = "0x0"
