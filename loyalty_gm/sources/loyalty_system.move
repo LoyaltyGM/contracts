@@ -7,16 +7,19 @@ module loyalty_gm::loyalty_system {
     use sui::url::{Self, Url};
     use sui::tx_context::{Self, TxContext};
     use sui::event::{emit};
-    use loyalty_gm::loyalty_store::{Self, LoyaltyStoreRecord};
     use sui::object_table::{ObjectTable};
+    use std::vector::length;
+    use loyalty_gm::loyalty_store::{Self, LoyaltyStoreRecord};
 
     // ======== Constants =========
 
-    const LIST_ID: u8 = 0;
+    const MAX_NAME_LENGTH: u64 = 32;
+    const MAX_DESCRIPTION_LENGTH: u64 = 255;
 
     // ======== Error codes =========
 
-    const EAdminOnly: u64 = 2;
+    const EAdminOnly: u64 = 0;
+    const ETextOverflow: u64 = 1;
 
     // ======== Structs =========
 
@@ -60,6 +63,9 @@ module loyalty_gm::loyalty_system {
         store: &mut ObjectTable<u64, LoyaltyStoreRecord>,
         ctx: &mut TxContext,
     ) {
+        assert!(length(&name) <= MAX_NAME_LENGTH, ETextOverflow);
+        assert!(length(&description) <= MAX_DESCRIPTION_LENGTH, ETextOverflow);
+
         let loyalty_system = LoyaltySystem { 
             id: object::new(ctx),
             name: string::utf8(name),
@@ -107,11 +113,13 @@ module loyalty_gm::loyalty_system {
     // ======== Admin Functions =========
 
     public entry fun update_loyalty_system_name(admin_cap: &AdminCap, loyalty_system: &mut LoyaltySystem, new_name: vector<u8> ){
+        assert!(length(&new_name) <= MAX_NAME_LENGTH, ETextOverflow);
         check_admin(admin_cap, loyalty_system);
         loyalty_system.name = string::utf8(new_name);
     }
 
     public entry fun update_loyalty_system_description(admin_cap: &AdminCap, loyalty_system: &mut LoyaltySystem, new_description: vector<u8> ){
+        assert!(length(&new_description) <= MAX_DESCRIPTION_LENGTH, ETextOverflow);
         check_admin(admin_cap, loyalty_system);
         loyalty_system.description = string::utf8(new_description);
     }
