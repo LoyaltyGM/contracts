@@ -11,8 +11,8 @@ module referal_system::token {
     // ======== Constants =========
 
     const NAME: vector<u8> = b"LoyaltyGM";
-    const DESCRIPTION: vector<u8> = b"SBT for Loyalty Rewards Platform on Sui Blockchain";
-    const URL: vector<u8> = b"ipfs://QmbtwaZubBFDXTvZ3S3ytdByaU85AzaY3yE8epVuhNkRZh";
+    const DESCRIPTION: vector<u8> = b"SoulboundToken Test for Loyalty Rewards Platform on Sui Blockchain";
+    const URL: vector<u8> = b"ipfs://QmVGYBzXTVzZFhJjtsd8bwBNJZ5drWwFF9XwsQJHFdbTkL";
 
     const INITIAL_REF_COUNTER: u64 = 0;
     const INITIAL_EXP: u64 = 0;
@@ -25,8 +25,8 @@ module referal_system::token {
 
     // ======== Structs =========
 
-    /// Loyalty Token.
-    struct Token has key {
+    /// Loyalty Soulbound Token.
+    struct SoulboundToken has key {
         id: UID,
         name: String,
         description: String,
@@ -60,7 +60,7 @@ module referal_system::token {
     // ======= Public functions =======
 
     public entry fun claim_exp (
-        token: &mut Token, 
+        token: &mut SoulboundToken, 
         table: &mut ObjectTable<address, UserData>,
         ctx: &mut TxContext
     ) {
@@ -113,7 +113,7 @@ module referal_system::token {
 
         let sender = tx_context::sender(ctx);
 
-        let nft = Token {
+        let nft = SoulboundToken {
             id: object::new(ctx),
             name: string::utf8(NAME),
             description: string::utf8(DESCRIPTION),
@@ -135,11 +135,11 @@ module referal_system::token {
 
     // work with token
 
-    fun update_token_exp(exp_to_add: u64, token: &mut Token) {
+    fun update_token_exp(exp_to_add: u64, token: &mut SoulboundToken) {
         token.current_exp = token.current_exp + exp_to_add;
     }
 
-    fun update_token_ref_counter(token: &mut Token) {
+    fun update_token_ref_counter(token: &mut SoulboundToken) {
         token.ref_counter = token.ref_counter + 1;
     }
 }
