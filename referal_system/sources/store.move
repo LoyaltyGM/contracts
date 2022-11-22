@@ -8,6 +8,7 @@ module referal_system::store {
 
     // ======== Constants =========
 
+    const INITIAL_REF_COUNTER: u64 = 0;
     const INITIAL_EXP: u64 = 0;
     const REF_REWARD_EXP: u64 = 5;
     
@@ -19,6 +20,7 @@ module referal_system::store {
         id: UID,
         token_id: ID,
         owner: address,
+        ref_counter: u64,
         // reset when claim
         claimable_exp: u64,
     }
@@ -43,6 +45,11 @@ module referal_system::store {
         user_data.claimable_exp
     }
 
+    public fun get_data_ref_counter(table: &ObjectTable<address, UserData>, owner: address): u64 {
+        let user_data = object_table::borrow<address, UserData>(table, owner);
+        user_data.ref_counter
+    }
+
     public(friend) fun add_new_data(
         table: &mut ObjectTable<address, UserData>, 
         token_id: ID,
@@ -53,10 +60,16 @@ module referal_system::store {
             id: object::new(ctx),
             token_id: token_id,
             owner: sender,
+            ref_counter: INITIAL_REF_COUNTER,
             claimable_exp: INITIAL_EXP,
         };
 
         object_table::add(table, sender, data)
+    }
+
+    public(friend) fun update_data_ref_counter(table: &mut ObjectTable<address, UserData>, owner: address) {
+        let user_data = object_table::borrow_mut<address, UserData>(table, owner);
+        user_data.ref_counter = user_data.ref_counter + 1;
     }
 
     public(friend) fun update_data_exp(table: &mut ObjectTable<address, UserData>, owner: address) {
