@@ -51,6 +51,7 @@ module referal_system::token {
     struct ClaimExpEvent has copy, drop {
         token_id: ID,
         claimer: address,
+        ref_counter: u64, 
         claimed_exp: u64,
     }
 
@@ -66,18 +67,20 @@ module referal_system::token {
     ) {
         let sender = tx_context::sender(ctx);
         let claimable_exp = store::get_data_exp(table, sender);
+        let new_ref_counter = store::get_data_ref_counter(table, sender);
 
         assert!(claimable_exp > 0, ENoClaimableExp);
 
         emit(ClaimExpEvent {
             token_id: object::id(token),
             claimer: sender,
+            ref_counter: new_ref_counter,
             claimed_exp: claimable_exp,
         });
 
         store::reset_data_exp(table, sender);
 
-        update_token_ref_counter(token);
+        update_token_ref_counter(new_ref_counter, token);
         update_token_exp(claimable_exp, token);
     }
 
@@ -98,7 +101,8 @@ module referal_system::token {
         mint_internal(some(ref_address), table, ctx);
         
         if (store::user_exists(table, ref_address)) {
-            store::update_data_exp(table, ref_address)
+            store::update_data_exp(table, ref_address);
+            store::update_data_ref_counter(table, ref_address)
         };
     }
 
@@ -139,7 +143,7 @@ module referal_system::token {
         token.current_exp = token.current_exp + exp_to_add;
     }
 
-    fun update_token_ref_counter(token: &mut SoulboundToken) {
-        token.ref_counter = token.ref_counter + 1;
+    fun update_token_ref_counter(new_ref_counter: u64, token: &mut SoulboundToken) {
+        token.ref_counter = new_ref_counter;
     }
 }
