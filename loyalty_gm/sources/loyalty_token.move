@@ -6,7 +6,7 @@ module loyalty_gm::loyalty_token {
     use sui::object_table::{ObjectTable};
     use sui::tx_context::{Self, TxContext};
     use sui::event::{emit};
-    use loyalty_gm::loyalty_system::{Self, AdminCap, LoyaltySystem};
+    use loyalty_gm::loyalty_system::{Self, LoyaltySystem};
     use loyalty_gm::user_store::{Self, UserData};
 
     // ======== Constants =========
@@ -65,7 +65,7 @@ module loyalty_gm::loyalty_token {
         ctx: &mut TxContext
     ) {
         assert!(*loyalty_system::get_user_store_id(ls) == object::id(user_store), EInvalidTokenStore);
-        
+
         assert!(user_store::user_exists(user_store, tx_context::sender(ctx)) == false, ENotUniqueAddress);
 
         loyalty_system::increment_total_minted(ls);
@@ -123,10 +123,5 @@ module loyalty_gm::loyalty_token {
 
     fun update_token_exp(exp_to_add: u64, token: &mut LoyaltyToken) {
         token.current_exp = token.current_exp + exp_to_add;
-    }
-
-    fun update_lvl(admin_cap: &AdminCap, token: &mut LoyaltyToken, _: &mut TxContext) {
-        assert!(&token.loyalty_system == loyalty_system::get_system_by_admin_cap(admin_cap), EAdminOnly);
-        token.level = token.level + 1;
     }
 }

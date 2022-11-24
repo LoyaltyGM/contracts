@@ -3,41 +3,40 @@ module loyalty_gm::system_store {
 
     use sui::object::{Self, UID, ID};
     use sui::transfer;
-    use sui::tx_context::{Self, TxContext};
-    use sui::object_table::{Self, ObjectTable};
+    use sui::tx_context::{TxContext};
+    use std::vector::{Self};
 
     // ======== Structs =========
 
-    struct LoyaltySystemData has key, store {
+    struct SystemStore has key {
         id: UID,
-        loyalty_system: ID,
-        creator: address,
+        systems: vector<ID>,
     }
 
     fun init(ctx: &mut TxContext) {
-        // Only one system per package!
-        // It contains all created Loyalty Systems
-        let table = object_table::new<ID, LoyaltySystemData>(ctx);
-        transfer::share_object(table)
+        let store = SystemStore {
+            id: object::new(ctx),
+            systems: vector::empty<ID>()
+        };
+
+        transfer::share_object(store)
     }
 
     // ======== Public functions =========
 
-    public(friend) fun add_system(store: &mut ObjectTable<ID, LoyaltySystemData>, loyalty_system_id: ID, ctx: &mut TxContext) {  
-        let record = LoyaltySystemData {
-            id: object::new(ctx),
-            loyalty_system: loyalty_system_id,
-            creator: tx_context::sender(ctx),
-        };
-
-        object_table::add(store, loyalty_system_id, record);
+    public(friend) fun add_system(store: &mut SystemStore, loyalty_system_id: ID, _: &mut TxContext) {  
+        vector::push_back(&mut store.systems, loyalty_system_id);
     }
 
-    public fun get_store_size(store: &ObjectTable<ID, LoyaltySystemData>): u64 {
-        object_table::length(store)
+    public fun length(store: &SystemStore): u64 {
+        vector::length(&store.systems)
     }
 
-    public fun get_record_by_key(store: &ObjectTable<ID, LoyaltySystemData>, loyalty_system_id: ID): &LoyaltySystemData {
-        object_table::borrow(store, loyalty_system_id)
+    public fun contains(store: &SystemStore, key: ID): bool {
+        vector::contains(&store.systems, &key)
+    }
+
+    public fun borrow(store: &SystemStore, i: u64): ID {
+        *vector::borrow(&store.systems, i)
     }
 }
