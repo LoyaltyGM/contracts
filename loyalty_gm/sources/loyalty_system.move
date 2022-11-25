@@ -8,7 +8,7 @@ module loyalty_gm::loyalty_system {
     use sui::tx_context::{Self, TxContext};
     use sui::event::{emit};
     use std::vector::length;
-    use loyalty_gm::system_store::{Self, SystemStore};
+    use loyalty_gm::system_store::{Self, SystemStore, SYSTEM_STORE};
     use loyalty_gm::user_store::{Self};
     use sui::vec_map::{Self, VecMap};
 
@@ -81,7 +81,7 @@ module loyalty_gm::loyalty_system {
         description: vector<u8>, 
         url: vector<u8>,
         max_supply: u64,
-        system_store: &mut SystemStore,
+        system_store: &mut SystemStore<SYSTEM_STORE>,
         ctx: &mut TxContext,
     ) {
         assert!(length(&name) <= MAX_NAME_LENGTH, ETextOverflow);
