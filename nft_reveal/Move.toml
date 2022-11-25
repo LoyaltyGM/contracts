@@ -1,0 +1,10 @@
+[package]
+name = "nftReveal"
+version = "0.0.1"
+
+[dependencies]
+Sui = { local = "../../sui/crates/sui-framework" }
+NftProtocol = { local = "./nft-protocol" }
+
+[addresses]
+nft_reveal = "0x0"
