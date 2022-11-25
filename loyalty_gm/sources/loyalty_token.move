@@ -3,20 +3,24 @@ module loyalty_gm::loyalty_token {
     use std::string::{Self, String};
     use sui::transfer;
     use sui::url::{Url};
+    use sui::object_table::{ObjectTable};
     use sui::tx_context::{Self, TxContext};
     use sui::event::{emit};
-    use loyalty_gm::loyalty_system::{Self, AdminCap, LoyaltySystem};
+    use loyalty_gm::loyalty_system::{Self, LoyaltySystem};
+    use loyalty_gm::user_store::{Self, UserData};
 
     // ======== Constants =========
 
-    const BASIC_LEVEL: u8 = 0;
-    const CURRENT_POINTS: u128 = 0;
+    const INITIAL_LVL: u8 = 0;
+    const INITIAL_EXP: u64 = 0;
 
     // ======== Error codes =========
 
-    const ELevel: u64 = 0;
+    const ENotUniqueAddress: u64 = 0;
     const ETooManyMint: u64 = 1;
-    const EAdminOnly: u64 = 2;
+    const ENoClaimableExp: u64 = 2;
+    const EAdminOnly: u64 = 3;
+    const EInvalidTokenStore: u64 = 4;
 
     // ======== Structs =========
 
@@ -31,7 +35,7 @@ module loyalty_gm::loyalty_token {
         // Level of nft [0-255]
         level: u8,
         // Expiration timestamp (UNIX time) - app specific
-        currentPointsXP: u128,
+        current_exp: u64,
         // TODO:
         // array of lvl points 
         // pointsToNextLvl: u128,
@@ -46,17 +50,27 @@ module loyalty_gm::loyalty_token {
         name: string::String,
     }
 
+    struct ClaimExpEvent has copy, drop {
+        token_id: ID,
+        claimer: address,
+        claimed_exp: u64,
+    }
+
+
     // ======= Public functions =======
 
     public entry fun mint(
         ls: &mut LoyaltySystem,
+        user_store: &mut ObjectTable<address, UserData>,
         ctx: &mut TxContext
     ) {
-        let n = *loyalty_system::get_issued_counter(ls);
-        loyalty_system::increment_issued_counter(ls);
-        
-        let max_supply = *loyalty_system::get_max_supply(ls);
-        assert!(n <= max_supply, ETooManyMint);
+        assert!(*loyalty_system::get_user_store_id(ls) == object::id(user_store), EInvalidTokenStore);
+
+        assert!(user_store::user_exists(user_store, tx_context::sender(ctx)) == false, ENotUniqueAddress);
+
+        loyalty_system::increment_total_minted(ls);
+        assert!(*loyalty_system::get_total_minted(ls) <= *loyalty_system::get_max_supply(ls), ETooManyMint);
+
 
         let nft = LoyaltyToken {
             id: object::new(ctx),
@@ -64,35 +78,50 @@ module loyalty_gm::loyalty_token {
             name: *loyalty_system::get_name(ls),
             description: *loyalty_system::get_description(ls),
             url: *loyalty_system::get_url(ls),
-            level: BASIC_LEVEL,
-            currentPointsXP: CURRENT_POINTS,
+            level: INITIAL_LVL,
+            current_exp: INITIAL_EXP,
         };
         let sender = tx_context::sender(ctx);
 
         emit(MintTokenEvent {
-            object_id: object::uid_to_inner(&nft.id),
+            object_id: object::id(&nft),
             loyalty_system: object::id(ls),
             minter: sender,
             name: nft.name,
         });
 
+        user_store::add_new_data(user_store, object::id(&nft), ctx);
         transfer::transfer(nft, sender);
     }
 
-    public fun current_lvl(nft: &mut LoyaltyToken): &u8 {
-        &nft.level
+    public entry fun claim_exp (
+        token: &mut LoyaltyToken, 
+        user_store: &mut ObjectTable<address, UserData>,
+        ctx: &mut TxContext
+    ) {
+        assert!(token.loyalty_system == object::id(user_store), EInvalidTokenStore);
+
+        let sender = tx_context::sender(ctx);
+        let claimable_exp = user_store::get_data_exp(user_store, sender);
+
+        assert!(claimable_exp > 0, ENoClaimableExp);
+
+        emit(ClaimExpEvent {
+            token_id: object::id(token),
+            claimer: sender,
+            claimed_exp: claimable_exp,
+        });
+
+        user_store::reset_data_exp(user_store, sender);
+
+        update_token_exp(claimable_exp, token);
     }
 
     // ======== Admin Functions =========
 
-    public entry fun update_lvl(admin_cap: &AdminCap, token: &mut LoyaltyToken, _: &mut TxContext) {
-        assert!(&token.loyalty_system == loyalty_system::get_system_by_admin_cap(admin_cap), EAdminOnly);
-        token.level = token.level + 1;
-    }
-
     // ======= Private and Utility functions =======
 
-    fun check_admin(admin_cap: &AdminCap, token: &LoyaltyToken) {
-        assert!(&token.loyalty_system == loyalty_system::get_system_by_admin_cap(admin_cap), EAdminOnly);
+    fun update_token_exp(exp_to_add: u64, token: &mut LoyaltyToken) {
+        token.current_exp = token.current_exp + exp_to_add;
     }
 }
