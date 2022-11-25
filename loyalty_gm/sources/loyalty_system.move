@@ -7,26 +7,31 @@ module loyalty_gm::loyalty_system {
     use sui::url::{Self, Url};
     use sui::tx_context::{Self, TxContext};
     use sui::event::{emit};
-    use sui::object_table::{ObjectTable};
     use std::vector::length;
-    use loyalty_gm::system_store::{Self, LoyaltySystemData};
+    use loyalty_gm::system_store::{Self, SystemStore};
     use loyalty_gm::user_store::{Self};
+    use sui::vec_map::{Self, VecMap};
+
 
     // ======== Constants =========
 
     const MAX_NAME_LENGTH: u64 = 32;
     const MAX_DESCRIPTION_LENGTH: u64 = 255;
+    const BASIC_REWARD_EXP: u64 = 5;
+    const BASIC_MAX_LEVELS: u64 = 30;
 
     // ======== Error codes =========
 
     const EAdminOnly: u64 = 0;
     const ETextOverflow: u64 = 1;
+    const EInvalidLevel: u64 = 3;
+
 
     // ======== Structs =========
 
     struct AdminCap has key, store { 
         id: UID,
-        loyalty_system: ID
+        loyalty_system: ID,
     }
 
     struct LoyaltySystem has key {
@@ -41,8 +46,21 @@ module loyalty_gm::loyalty_system {
         description: String,
         // Loyalty token image url
         url: Url,
+        max_levels: u64,
+        tasks: VecMap<u64, TaskInfo>,
+        rewards: VecMap<u64, RewardInfo>,
         creator: address,
-        user_store: ID
+        user_store: ID,
+    }
+
+    struct TaskInfo has store, drop {
+        reward_exp: u64,
+        description: String,
+    }
+
+    struct RewardInfo has store, drop {
+        level: u64,
+        description: String,
     }
 
     // ======== Events =========
@@ -63,7 +81,7 @@ module loyalty_gm::loyalty_system {
         description: vector<u8>, 
         url: vector<u8>,
         max_supply: u64,
-        system_store: &mut ObjectTable<ID, LoyaltySystemData>,
+        system_store: &mut SystemStore,
         ctx: &mut TxContext,
     ) {
         assert!(length(&name) <= MAX_NAME_LENGTH, ETextOverflow);
@@ -80,7 +98,10 @@ module loyalty_gm::loyalty_system {
             total_minted: 0,
             max_supply: max_supply,
             creator: sender,
+            max_levels: BASIC_MAX_LEVELS,
             user_store: user_store_id,
+            tasks: vec_map::empty<u64, TaskInfo>(),
+            rewards: vec_map::empty<u64, RewardInfo>(),
         };
 
         emit(CreateLoyaltySystemEvent {
@@ -89,7 +110,11 @@ module loyalty_gm::loyalty_system {
             name: loyalty_system.name,
         });
         
-        transfer::transfer(AdminCap { id: object::new(ctx), loyalty_system: object::uid_to_inner(&loyalty_system.id) }, sender);
+        transfer::transfer(AdminCap { 
+            id: object::new(ctx), 
+            loyalty_system: object::uid_to_inner(&loyalty_system.id),
+        }, sender);
+
         system_store::add_system(system_store, object::uid_to_inner(&loyalty_system.id), ctx);
         transfer::share_object(loyalty_system);
     }
@@ -118,10 +143,6 @@ module loyalty_gm::loyalty_system {
         &loyalty_system.user_store
     }
 
-    public fun get_system_by_admin_cap(admin_cap: &AdminCap): &ID {
-        &admin_cap.loyalty_system
-    }
-
     // ======== Admin Functions =========
 
     public entry fun update_loyalty_system_name(admin_cap: &AdminCap, loyalty_system: &mut LoyaltySystem, new_name: vector<u8> ){
@@ -144,6 +165,23 @@ module loyalty_gm::loyalty_system {
     public entry fun update_loyalty_system_max_supply(admin_cap: &AdminCap, loyalty_system: &mut LoyaltySystem, new_max_supply: u64 ){
         check_admin(admin_cap, loyalty_system);
         loyalty_system.max_supply = new_max_supply;
+    }
+
+    public entry fun add_reward_info(admin_cap: &AdminCap, level: u64, description: vector<u8>, loyalty_system: &mut LoyaltySystem, _: &mut TxContext) {
+        check_admin(admin_cap, loyalty_system);
+        assert!(level <= loyalty_system.max_levels, EInvalidLevel);
+
+        let reward_info = RewardInfo {
+            level: level, 
+            description: string::utf8(description)
+        };
+        vec_map::insert(&mut loyalty_system.rewards, level, reward_info);
+    }
+
+    public entry fun remove_reward_info(admin_cap: &AdminCap, level: u64, loyalty_system: &mut LoyaltySystem, _: &mut TxContext) {
+        check_admin(admin_cap, loyalty_system);
+
+        vec_map::remove(&mut loyalty_system.rewards, &level);
     }
 
     // ======= Private and Utility functions =======
