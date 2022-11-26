@@ -13,10 +13,10 @@ subdir = "sui"
 # devnet-0.16.0
 rev = "cfe98c1c87be8ece8f375c83aedddc028744fced"
 
-[dependencies.NftProtocol]
-git = "https://github.com/Origin-Byte/nft-protocol.git"
-# devnet-0.16.0
-rev = "cfe98c1c87be8ece8f375c83aedddc028744fced"
+# [dependencies.NftProtocol]
+# git = "https://github.com/Origin-Byte/nft-protocol.git"
+# # devnet-0.16.0
+# rev = "cfe98c1c87be8ece8f375c83aedddc028744fced"
 
 [addresses]
 nft_reveal = "0x0"
