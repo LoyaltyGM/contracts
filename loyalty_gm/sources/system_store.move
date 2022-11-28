@@ -5,7 +5,6 @@ module loyalty_gm::system_store {
     use sui::transfer;
     use sui::tx_context::{TxContext};
     use std::vector::{Self};
-    use sui::types;
 
     const ENotOneTimeWitness: u64 = 0;
 
@@ -17,9 +16,7 @@ module loyalty_gm::system_store {
         systems: vector<ID>,
     }
 
-    fun init(witness: SYSTEM_STORE, ctx: &mut TxContext) {
-        assert!(types::is_one_time_witness(&witness), ENotOneTimeWitness);
-
+    fun init(_: SYSTEM_STORE, ctx: &mut TxContext) {
         let store = SystemStore<SYSTEM_STORE> {
             id: object::new(ctx),
             systems: vector::empty<ID>()

@@ -1,20 +1,23 @@
 module loyalty_gm::loyalty_system {
     friend loyalty_gm::loyalty_token;
 
-    use sui::object::{Self, UID, ID};
+    use std::vector::length;
     use std::string::{Self, String};
+    use sui::object::{Self, UID, ID};
     use sui::transfer;
     use sui::url::{Self, Url};
     use sui::tx_context::{Self, TxContext};
     use sui::event::{emit};
-    use std::vector::length;
-    use loyalty_gm::system_store::{Self, SystemStore, SYSTEM_STORE};
-    use loyalty_gm::user_store::{Self};
     use sui::vec_map::{Self, VecMap};
+    use sui::table::{Table};
+    use sui::dynamic_object_field as ofield;
+
+    use loyalty_gm::system_store::{Self, SystemStore, SYSTEM_STORE};
+    use loyalty_gm::user_store::{Self, UserData};
 
 
     // ======== Constants =========
-
+    const USER_STORE_KEY: vector<u8> = b"user_store";
     const MAX_NAME_LENGTH: u64 = 32;
     const MAX_DESCRIPTION_LENGTH: u64 = 255;
     const BASIC_REWARD_EXP: u64 = 5;
@@ -33,7 +36,8 @@ module loyalty_gm::loyalty_system {
         id: UID,
         loyalty_system: ID,
     }
-
+    
+    //TODO: rewards & tasks to modules
     struct LoyaltySystem has key {
         id: UID,
         // Loyalty token name
@@ -50,7 +54,9 @@ module loyalty_gm::loyalty_system {
         tasks: VecMap<u64, TaskInfo>,
         rewards: VecMap<u64, RewardInfo>,
         creator: address,
-        user_store: ID,
+
+        // --dynamic fields--
+        // user_store: Table<address, UserData>,
     }
 
     struct TaskInfo has store, drop {
@@ -88,7 +94,6 @@ module loyalty_gm::loyalty_system {
         assert!(length(&description) <= MAX_DESCRIPTION_LENGTH, ETextOverflow);
 
         let sender = tx_context::sender(ctx);
-        let user_store_id = user_store::create_store(ctx);
 
         let loyalty_system = LoyaltySystem { 
             id: object::new(ctx),
@@ -99,10 +104,10 @@ module loyalty_gm::loyalty_system {
             max_supply: max_supply,
             creator: sender,
             max_levels: BASIC_MAX_LEVELS,
-            user_store: user_store_id,
             tasks: vec_map::empty<u64, TaskInfo>(),
             rewards: vec_map::empty<u64, RewardInfo>(),
         };
+        ofield::add(&mut loyalty_system.id, USER_STORE_KEY, user_store::create_store(ctx));
 
         emit(CreateLoyaltySystemEvent {
             object_id: object::uid_to_inner(&loyalty_system.id),
@@ -139,8 +144,8 @@ module loyalty_gm::loyalty_system {
         &loyalty_system.url
     }
 
-    public fun get_user_store_id(loyalty_system: &LoyaltySystem): &ID {
-        &loyalty_system.user_store
+    public fun get_user_store(loyalty_system: &LoyaltySystem): &Table<address, UserData> {
+        ofield::borrow(&loyalty_system.id, USER_STORE_KEY)
     }
 
     // ======== Admin Functions =========
@@ -188,6 +193,10 @@ module loyalty_gm::loyalty_system {
 
     fun check_admin(admin_cap: &AdminCap, system: &LoyaltySystem) {
         assert!(object::borrow_id(system) == &admin_cap.loyalty_system, EAdminOnly);
+    }
+
+    public(friend) fun get_mut_user_store(loyalty_system: &mut LoyaltySystem): &mut Table<address, UserData>{
+        ofield::borrow_mut(&mut loyalty_system.id, USER_STORE_KEY)
     }
 
     public(friend) fun increment_total_minted(loyalty_system: &mut LoyaltySystem){

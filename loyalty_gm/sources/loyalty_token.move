@@ -3,11 +3,10 @@ module loyalty_gm::loyalty_token {
     use std::string::{Self, String};
     use sui::transfer;
     use sui::url::{Url};
-    use sui::object_table::{ObjectTable};
     use sui::tx_context::{Self, TxContext};
     use sui::event::{emit};
     use loyalty_gm::loyalty_system::{Self, LoyaltySystem};
-    use loyalty_gm::user_store::{Self, UserData};
+    use loyalty_gm::user_store::{Self};
 
     // ======== Constants =========
 
@@ -61,13 +60,8 @@ module loyalty_gm::loyalty_token {
 
     public entry fun mint(
         ls: &mut LoyaltySystem,
-        user_store: &mut ObjectTable<address, UserData>,
         ctx: &mut TxContext
     ) {
-        assert!(*loyalty_system::get_user_store_id(ls) == object::id(user_store), EInvalidTokenStore);
-
-        assert!(user_store::user_exists(user_store, tx_context::sender(ctx)) == false, ENotUniqueAddress);
-
         loyalty_system::increment_total_minted(ls);
         assert!(*loyalty_system::get_total_minted(ls) <= *loyalty_system::get_max_supply(ls), ETooManyMint);
 
@@ -90,17 +84,16 @@ module loyalty_gm::loyalty_token {
             name: nft.name,
         });
 
-        user_store::add_new_data(user_store, object::id(&nft), ctx);
+        user_store::add_new_data(loyalty_system::get_mut_user_store(ls), object::id(&nft), ctx);
         transfer::transfer(nft, sender);
     }
 
     public entry fun claim_exp (
+        ls: &mut LoyaltySystem,
         token: &mut LoyaltyToken, 
-        user_store: &mut ObjectTable<address, UserData>,
         ctx: &mut TxContext
     ) {
-        assert!(token.loyalty_system == object::id(user_store), EInvalidTokenStore);
-
+        let user_store = loyalty_system::get_mut_user_store(ls);
         let sender = tx_context::sender(ctx);
         let claimable_exp = user_store::get_data_exp(user_store, sender);
 
