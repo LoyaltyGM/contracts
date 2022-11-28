@@ -178,4 +178,9 @@ module nft_reveal::loot_box {
         
         result_rarity
     }
+    // https://stackoverflow.com/questions/74513153/test-for-init-function-from-examples-doesnt-works
+    #[test_only]
+    public fun init_for_testing(ctx: &mut TxContext) {
+        init(ctx);
+    }
 }
