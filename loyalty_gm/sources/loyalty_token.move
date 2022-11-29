@@ -63,8 +63,6 @@ module loyalty_gm::loyalty_token {
         ctx: &mut TxContext
     ) {
         loyalty_system::increment_total_minted(ls);
-        assert!(*loyalty_system::get_total_minted(ls) <= *loyalty_system::get_max_supply(ls), ETooManyMint);
-
 
         let nft = LoyaltyToken {
             id: object::new(ctx),
@@ -84,7 +82,7 @@ module loyalty_gm::loyalty_token {
             name: nft.name,
         });
 
-        user_store::add_new_data(loyalty_system::get_mut_user_store(ls), object::id(&nft), ctx);
+        user_store::add_user(loyalty_system::get_mut_user_store(ls), object::id(&nft), ctx);
         transfer::transfer(nft, sender);
     }
 
@@ -93,10 +91,8 @@ module loyalty_gm::loyalty_token {
         token: &mut LoyaltyToken, 
         ctx: &mut TxContext
     ) {
-        let user_store = loyalty_system::get_mut_user_store(ls);
         let sender = tx_context::sender(ctx);
-        let claimable_exp = user_store::get_data_exp(user_store, sender);
-
+        let claimable_exp = user_store::get_user_exp(loyalty_system::get_user_store(ls), sender);
         assert!(claimable_exp > 0, ENoClaimableExp);
 
         emit(ClaimExpEvent {
@@ -105,7 +101,7 @@ module loyalty_gm::loyalty_token {
             claimed_exp: claimable_exp,
         });
 
-        user_store::reset_data_exp(user_store, sender);
+        user_store::reset_user_exp(loyalty_system::get_mut_user_store(ls), sender);
 
         update_token_exp(claimable_exp, token);
     }

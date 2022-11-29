@@ -8,12 +8,14 @@ module loyalty_gm::loyalty_system {
     use sui::url::{Self, Url};
     use sui::tx_context::{Self, TxContext};
     use sui::event::{emit};
-    use sui::vec_map::{Self, VecMap};
+    use sui::vec_map::{VecMap};
     use sui::table::{Table};
     use sui::dynamic_object_field as ofield;
 
     use loyalty_gm::system_store::{Self, SystemStore, SYSTEM_STORE};
-    use loyalty_gm::user_store::{Self, UserData};
+    use loyalty_gm::user_store::{Self, User};
+    use loyalty_gm::reward_store::{Self, Reward};
+    use loyalty_gm::task_store::{Self, Task};
 
 
     // ======== Constants =========
@@ -27,7 +29,8 @@ module loyalty_gm::loyalty_system {
 
     const EAdminOnly: u64 = 0;
     const ETextOverflow: u64 = 1;
-    const EInvalidLevel: u64 = 3;
+    const EInvalidLevel: u64 = 2;
+    const EMaxSupplyReached: u64 = 3;
 
 
     // ======== Structs =========
@@ -51,22 +54,12 @@ module loyalty_gm::loyalty_system {
         // Loyalty token image url
         url: Url,
         max_levels: u64,
-        tasks: VecMap<u64, TaskInfo>,
-        rewards: VecMap<u64, RewardInfo>,
+        tasks: VecMap<String, Task>,
+        rewards: VecMap<u64, Reward>,
         creator: address,
 
         // --dynamic fields--
-        // user_store: Table<address, UserData>,
-    }
-
-    struct TaskInfo has store, drop {
-        reward_exp: u64,
-        description: String,
-    }
-
-    struct RewardInfo has store, drop {
-        level: u64,
-        description: String,
+        // user_store: Table<address, User>,
     }
 
     // ======== Events =========
@@ -82,7 +75,7 @@ module loyalty_gm::loyalty_system {
 
     // ======= Public functions =======
 
-     public entry fun create_loyalty_system(
+    public entry fun create_loyalty_system(
         name: vector<u8>, 
         description: vector<u8>, 
         url: vector<u8>,
@@ -104,10 +97,10 @@ module loyalty_gm::loyalty_system {
             max_supply: max_supply,
             creator: sender,
             max_levels: BASIC_MAX_LEVELS,
-            tasks: vec_map::empty<u64, TaskInfo>(),
-            rewards: vec_map::empty<u64, RewardInfo>(),
+            tasks: task_store::empty(),
+            rewards: reward_store::empty(),
         };
-        ofield::add(&mut loyalty_system.id, USER_STORE_KEY, user_store::create_store(ctx));
+        ofield::add(&mut loyalty_system.id, USER_STORE_KEY, user_store::new(ctx));
 
         emit(CreateLoyaltySystemEvent {
             object_id: object::uid_to_inner(&loyalty_system.id),
@@ -122,6 +115,15 @@ module loyalty_gm::loyalty_system {
 
         system_store::add_system(system_store, object::uid_to_inner(&loyalty_system.id), ctx);
         transfer::share_object(loyalty_system);
+    }
+
+    public(friend) fun get_mut_user_store(loyalty_system: &mut LoyaltySystem): &mut Table<address, User>{
+        ofield::borrow_mut(&mut loyalty_system.id, USER_STORE_KEY)
+    }
+
+    public(friend) fun increment_total_minted(loyalty_system: &mut LoyaltySystem){
+        assert!(*get_total_minted(loyalty_system) <= *get_max_supply(loyalty_system), EMaxSupplyReached);
+        loyalty_system.total_minted = loyalty_system.total_minted + 1;
     }
 
     public fun get_name(loyalty_system: &LoyaltySystem): &string::String {
@@ -144,7 +146,7 @@ module loyalty_gm::loyalty_system {
         &loyalty_system.url
     }
 
-    public fun get_user_store(loyalty_system: &LoyaltySystem): &Table<address, UserData> {
+    public fun get_user_store(loyalty_system: &LoyaltySystem): &Table<address, User> {
         ofield::borrow(&loyalty_system.id, USER_STORE_KEY)
     }
 
@@ -172,34 +174,46 @@ module loyalty_gm::loyalty_system {
         loyalty_system.max_supply = new_max_supply;
     }
 
-    public entry fun add_reward_info(admin_cap: &AdminCap, level: u64, description: vector<u8>, loyalty_system: &mut LoyaltySystem, _: &mut TxContext) {
+    public entry fun add_reward(admin_cap: &AdminCap, level: u64, description: vector<u8>, loyalty_system: &mut LoyaltySystem, _: &mut TxContext) {
         check_admin(admin_cap, loyalty_system);
         assert!(level <= loyalty_system.max_levels, EInvalidLevel);
 
-        let reward_info = RewardInfo {
-            level: level, 
-            description: string::utf8(description)
-        };
-        vec_map::insert(&mut loyalty_system.rewards, level, reward_info);
+        reward_store::add_reward(&mut loyalty_system.rewards, level, description);
     }
 
-    public entry fun remove_reward_info(admin_cap: &AdminCap, level: u64, loyalty_system: &mut LoyaltySystem, _: &mut TxContext) {
+    public entry fun remove_reward(admin_cap: &AdminCap, level: u64, loyalty_system: &mut LoyaltySystem, _: &mut TxContext) {
         check_admin(admin_cap, loyalty_system);
 
-        vec_map::remove(&mut loyalty_system.rewards, &level);
+        reward_store::remove_reward(&mut loyalty_system.rewards, level);
+    }
+
+    public entry fun add_task(
+        admin_cap: &AdminCap, 
+        loyalty_system: &mut LoyaltySystem,
+        name: vector<u8>, 
+        description: vector<u8>, 
+        reward_exp: u64, 
+         _: &mut TxContext
+    ) {
+        check_admin(admin_cap, loyalty_system);
+
+        task_store::add_task(&mut loyalty_system.tasks, name, description, reward_exp);
+    }
+
+    public entry fun remove_task(
+        admin_cap: &AdminCap, 
+        loyalty_system: &mut LoyaltySystem, 
+        name: vector<u8>,  
+        _: &mut TxContext
+    ) {
+        check_admin(admin_cap, loyalty_system);
+
+        task_store::remove_task(&mut loyalty_system.tasks, name);
     }
 
     // ======= Private and Utility functions =======
 
     fun check_admin(admin_cap: &AdminCap, system: &LoyaltySystem) {
         assert!(object::borrow_id(system) == &admin_cap.loyalty_system, EAdminOnly);
-    }
-
-    public(friend) fun get_mut_user_store(loyalty_system: &mut LoyaltySystem): &mut Table<address, UserData>{
-        ofield::borrow_mut(&mut loyalty_system.id, USER_STORE_KEY)
-    }
-
-    public(friend) fun increment_total_minted(loyalty_system: &mut LoyaltySystem){
-        loyalty_system.total_minted = loyalty_system.total_minted + 1;
     }
 }

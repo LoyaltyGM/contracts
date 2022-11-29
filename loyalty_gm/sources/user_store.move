@@ -1,4 +1,6 @@
 module loyalty_gm::user_store {
+    // ======== store: Table<address, UserData> =========
+
     friend loyalty_gm::loyalty_system;
     friend loyalty_gm::loyalty_token;
 
@@ -13,7 +15,7 @@ module loyalty_gm::user_store {
 
     // ======== Structs =========
 
-    struct UserData has key, store {
+    struct User has key, store {
         id: UID,
         token_id: ID,
         owner: address,
@@ -23,17 +25,17 @@ module loyalty_gm::user_store {
 
     // ======== Public functions =========
 
-    public(friend) fun create_store(ctx: &mut TxContext): Table<address, UserData> {  
-        table::new<address, UserData>(ctx)
+    public(friend) fun new(ctx: &mut TxContext): Table<address, User> {  
+        table::new<address, User>(ctx)
     }
 
-    public(friend) fun add_new_data(
-        store: &mut Table<address, UserData>, 
+    public(friend) fun add_user(
+        store: &mut Table<address, User>, 
         token_id: ID,
         ctx: &mut TxContext
     ) {
         let sender = tx_context::sender(ctx);
-        let data = UserData {
+        let data = User {
             id: object::new(ctx),
             token_id: token_id,
             owner: sender,
@@ -44,30 +46,30 @@ module loyalty_gm::user_store {
     }
 
     // Not currently used anywhere
-    public(friend) fun update_data_exp(store: &mut Table<address, UserData>, owner: address) {
-        let user_data = table::borrow_mut<address, UserData>(store, owner);
+    public(friend) fun update_user_exp(store: &mut Table<address, User>, owner: address) {
+        let user_data = table::borrow_mut<address, User>(store, owner);
         user_data.claimable_exp = user_data.claimable_exp + BASIC_REWARD_EXP;
     }
 
-    public(friend) fun reset_data_exp(store: &mut Table<address, UserData>, owner: address) {
-        let user_data = table::borrow_mut<address, UserData>(store, owner);
+    public(friend) fun reset_user_exp(store: &mut Table<address, User>, owner: address) {
+        let user_data = table::borrow_mut<address, User>(store, owner);
         user_data.claimable_exp = INITIAL_EXP;
     }
 
-    public fun get_store_size(store: &Table<ID, UserData>): u64 {
+    public fun size(store: &Table<ID, User>): u64 {
         table::length(store)
     }
 
-    public fun get_user_data(store: &Table<address, UserData>, owner: address): &UserData {
+    public fun get_user(store: &Table<address, User>, owner: address): &User {
         table::borrow(store, owner)
     }
 
-    public fun user_exists(table: &Table<address, UserData>, owner: address): bool {
+    public fun user_exists(table: &Table<address, User>, owner: address): bool {
         table::contains(table, owner)
     }
 
-    public fun get_data_exp(table: &Table<address, UserData>, owner: address): u64 {
-        let user_data = table::borrow<address, UserData>(table, owner);
+    public fun get_user_exp(table: &Table<address, User>, owner: address): u64 {
+        let user_data = table::borrow<address, User>(table, owner);
         user_data.claimable_exp
     }
 }

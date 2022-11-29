@@ -1,0 +1,51 @@
+module loyalty_gm::task_store {
+    // name to task
+    // ======== store: VecMap<String, Task> =========
+    
+    friend loyalty_gm::loyalty_system;
+    friend loyalty_gm::loyalty_token;
+
+    use std::string::{Self, String};
+
+    use sui::object::{Self, UID, ID};
+    use sui::tx_context::{Self, TxContext};
+    use sui::vec_map::{Self, VecMap};
+
+    // ======== Constants =========
+
+    const INITIAL_EXP: u64 = 0;
+    const BASIC_REWARD_EXP: u64 = 5;
+
+    // ======== Structs =========
+
+    struct Task has store, drop {
+        name: String,
+        description: String,
+        reward_exp: u64,
+    }
+
+    // ======== Public functions =========
+
+    public(friend) fun empty(): VecMap<String, Task> {  
+        vec_map::empty<String, Task>()
+    }
+
+    public(friend) fun add_task(
+        store: &mut VecMap<String, Task>, 
+        name: vector<u8>,
+        description: vector<u8>,
+        reward_exp: u64, 
+    ) {
+        let task_name = string::utf8(name);
+        let reward_info = Task {
+            name: task_name,
+            description: string::utf8(description),
+            reward_exp: reward_exp,
+        };
+        vec_map::insert(store, task_name, reward_info);
+    }
+
+    public(friend) fun remove_task(store: &mut VecMap<String, Task>, name: vector<u8>) {
+        vec_map::remove(store, &string::utf8(name));
+    }
+}

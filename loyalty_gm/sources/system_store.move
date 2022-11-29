@@ -6,8 +6,6 @@ module loyalty_gm::system_store {
     use sui::tx_context::{TxContext};
     use std::vector::{Self};
 
-    const ENotOneTimeWitness: u64 = 0;
-
     // ======== Structs =========
     struct SYSTEM_STORE has drop {}
 
