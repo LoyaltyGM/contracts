@@ -19,6 +19,8 @@ module loyalty_gm::user_store {
         id: UID,
         token_id: ID,
         owner: address,
+        // active_tasks: VecSet<name>
+        // done_tasks: VecSet<name>
         // reset when claim
         claimable_exp: u64,
     }

@@ -153,6 +153,11 @@ module loyalty_gm::loyalty_system {
         ofield::borrow(&loyalty_system.id, USER_STORE_KEY)
     }
 
+    // public entry start_task(loyalty_system, task_name,)
+
+    // public entry verify_task(loyalty_system, task_name)
+    // VerifierCap
+
     // ======== Admin Functions =========
 
     public entry fun update_loyalty_system_name(admin_cap: &AdminCap, loyalty_system: &mut LoyaltySystem, new_name: vector<u8> ){

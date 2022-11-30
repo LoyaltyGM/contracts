@@ -22,9 +22,19 @@ module loyalty_gm::task_store {
         name: String,
         description: String,
         reward_exp: u64,
+        // Package
+        // Module
+        // Function
+        // Argument
+        // timestamp
     }
 
     // ======== Public functions =========
+
+    // public entry start_task(name,)
+
+    
+    // ======== Friend functions =========
 
     public(friend) fun empty(): VecMap<String, Task> {  
         vec_map::empty<String, Task>()
