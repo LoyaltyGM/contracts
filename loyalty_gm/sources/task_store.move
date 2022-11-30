@@ -36,13 +36,13 @@ module loyalty_gm::task_store {
         description: vector<u8>,
         reward_exp: u64, 
     ) {
-        let task_name = string::utf8(name);
+        let name = string::utf8(name);
         let reward_info = Task {
-            name: task_name,
+            name,
             description: string::utf8(description),
-            reward_exp: reward_exp,
+            reward_exp,
         };
-        vec_map::insert(store, task_name, reward_info);
+        vec_map::insert(store, name, reward_info);
     }
 
     public(friend) fun remove_task(store: &mut VecMap<String, Task>, name: vector<u8>) {

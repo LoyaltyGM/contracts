@@ -34,15 +34,15 @@ module loyalty_gm::user_store {
         token_id: ID,
         ctx: &mut TxContext
     ) {
-        let sender = tx_context::sender(ctx);
+        let owner = tx_context::sender(ctx);
         let data = User {
             id: object::new(ctx),
-            token_id: token_id,
-            owner: sender,
+            token_id,
+            owner,
             claimable_exp: INITIAL_EXP,
         };
 
-        table::add(store, sender, data)
+        table::add(store, owner, data)
     }
 
     // Not currently used anywhere

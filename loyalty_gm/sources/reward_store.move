@@ -31,7 +31,7 @@ module loyalty_gm::reward_store {
 
     public(friend) fun add_reward(store: &mut VecMap<u64, Reward>, level: u64, description: vector<u8>) {
         let reward_info = Reward {
-            level: level, 
+            level, 
             description: string::utf8(description)
         };
         vec_map::insert(store, level, reward_info);

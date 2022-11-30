@@ -86,7 +86,7 @@ module loyalty_gm::loyalty_system {
         assert!(length(&name) <= MAX_NAME_LENGTH, ETextOverflow);
         assert!(length(&description) <= MAX_DESCRIPTION_LENGTH, ETextOverflow);
 
-        let sender = tx_context::sender(ctx);
+        let creator = tx_context::sender(ctx);
 
         let loyalty_system = LoyaltySystem { 
             id: object::new(ctx),
@@ -94,8 +94,8 @@ module loyalty_gm::loyalty_system {
             description: string::utf8(description),
             url: url::new_unsafe_from_bytes(url),
             total_minted: 0,
-            max_supply: max_supply,
-            creator: sender,
+            max_supply,
+            creator,
             max_levels: BASIC_MAX_LEVELS,
             tasks: task_store::empty(),
             rewards: reward_store::empty(),
@@ -104,14 +104,14 @@ module loyalty_gm::loyalty_system {
 
         emit(CreateLoyaltySystemEvent {
             object_id: object::uid_to_inner(&loyalty_system.id),
-            creator: sender,
+            creator,
             name: loyalty_system.name,
         });
         
         transfer::transfer(AdminCap { 
             id: object::new(ctx), 
             loyalty_system: object::uid_to_inner(&loyalty_system.id),
-        }, sender);
+        }, creator);
 
         system_store::add_system(system_store, object::uid_to_inner(&loyalty_system.id), ctx);
         transfer::share_object(loyalty_system);
