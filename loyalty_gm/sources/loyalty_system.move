@@ -40,23 +40,26 @@ module loyalty_gm::loyalty_system {
         loyalty_system: ID,
     }
     
-    //TODO: rewards & tasks to modules
     struct LoyaltySystem has key {
+        // collection
         id: UID,
         // Loyalty token name
         name: String,
-        // Loyalty token total max supply
-        max_supply: u64,
+        // Loyalty token description
+        description: String,
         // Total number of NFTs that have been issued. 
         total_minted: u64,
-         // Loyalty token description
-        description: String,
+        // Loyalty token total max supply
+        max_supply: u64,
         // Loyalty token image url
         url: Url,
+        creator: address,
+
+
+        // tasks & rewards
         max_levels: u64,
         tasks: VecMap<String, Task>,
         rewards: VecMap<u64, Reward>,
-        creator: address,
 
         // --dynamic fields--
         // user_store: Table<address, User>,
