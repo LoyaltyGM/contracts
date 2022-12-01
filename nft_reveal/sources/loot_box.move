@@ -113,6 +113,10 @@ module nft_reveal::loot_box {
         collection._box_minted
     }
 
+    public fun get_box_opened(collection: &BoxCollection): u64 {
+        collection._box_opened
+    }
+
     public entry fun buy_box(
         collection: &mut BoxCollection, 
         paid: Coin<SUI>, 
