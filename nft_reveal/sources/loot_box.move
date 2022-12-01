@@ -67,16 +67,26 @@ module nft_reveal::loot_box {
 
     // ======== Init =========
 
-    fun init(ctx: &mut TxContext) {
-        let rarity_types = vector::empty<String>();
+    fun rarity_type(): vector<String> {
+       let rarity_types = vector::empty<String>();
         vector::push_back(&mut rarity_types, string::utf8(b"Common"));
         vector::push_back(&mut rarity_types, string::utf8(b"Rare"));
         vector::push_back(&mut rarity_types, string::utf8(b"Epic"));
+        rarity_types 
+    }
 
+    fun rarity_weight(): vector<u64> {
         let rarity_weights = vector::empty<u64>();
         vector::push_back(&mut rarity_weights, 70);
         vector::push_back(&mut rarity_weights, 25);
         vector::push_back(&mut rarity_weights, 5);
+        rarity_weights
+    }
+
+    fun init(ctx: &mut TxContext) {
+        let rarity_types = rarity_type();
+
+        let rarity_weights = rarity_weight();
         
         let collection = BoxCollection {
             id: object::new(ctx),
@@ -94,6 +104,14 @@ module nft_reveal::loot_box {
     }
 
     // ======== Public functions =========
+
+    public fun owner(collection: &BoxCollection): address {
+        collection.creator
+    }
+
+    public fun get_box_minted(collection: &BoxCollection): u64 {
+        collection._box_minted
+    }
 
     public entry fun buy_box(
         collection: &mut BoxCollection, 
@@ -180,7 +198,23 @@ module nft_reveal::loot_box {
     }
     // https://stackoverflow.com/questions/74513153/test-for-init-function-from-examples-doesnt-works
     #[test_only]
-    public fun init_for_testing(ctx: &mut TxContext) {
-        init(ctx);
+    public fun create_lootbox(ctx: &mut TxContext) {
+        let rarity_types = rarity_type();
+        let rarity_weights = rarity_weight();
+
+        let collection = BoxCollection {
+            id: object::new(ctx),
+            creator: tx_context::sender(ctx),
+            box_max_supply: 1000,
+            box_url: url::new_unsafe_from_bytes(BOX_URL),
+            box_price: 10000000,
+            rarity_types: rarity_types,
+            rarity_weights: rarity_weights,
+            _box_minted: 0,
+            _box_opened: 0,
+        };
+
+        transfer::share_object(collection);
+        
     }
 }
