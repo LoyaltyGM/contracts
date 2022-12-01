@@ -7,8 +7,6 @@ module loyalty_gm::reward_store {
 
     use std::string::{Self, String};
 
-    use sui::object::{Self, UID, ID};
-    use sui::tx_context::{Self, TxContext};
     use sui::vec_map::{Self, VecMap};
 
     // ======== Constants =========

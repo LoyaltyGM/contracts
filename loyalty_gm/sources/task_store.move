@@ -6,11 +6,11 @@ module loyalty_gm::task_store {
     friend loyalty_gm::loyalty_token;
 
     use std::string::{Self, String};
-    use std::vector::{Self};
 
-    use sui::object::{Self, UID, ID};
-    use sui::tx_context::{Self, TxContext};
+    use sui::object::{ID};
     use sui::vec_map::{Self, VecMap};
+
+    use loyalty_gm::utils::{Self};
 
     // ======== Constants =========
 
@@ -57,12 +57,6 @@ module loyalty_gm::task_store {
         start: u64,
         end: u64,
     ) {
-        let string_args = vector::empty<String>();
-        vector::reverse(&mut arguments);
-        while(!vector::is_empty(&arguments)) {
-            vector::push_back(&mut string_args, string::utf8(vector::pop_back(&mut arguments)))
-        };
-
         let task = Task {
             id,
             name: string::utf8(name),
@@ -71,7 +65,7 @@ module loyalty_gm::task_store {
             package_id,
             module_name: string::utf8(module_name),
             function_name: string::utf8(function_name),
-            arguments: vector::empty<String>(),
+            arguments: utils::to_string_vec(arguments),
             start,
             end,
         };
