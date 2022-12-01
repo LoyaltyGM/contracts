@@ -7,11 +7,16 @@ module loyalty_gm::user_store {
     use sui::object::{Self, UID, ID};
     use sui::tx_context::{Self, TxContext};
     use sui::table::{Self, Table};
+    use sui::vec_set::{Self, VecSet};
 
     // ======== Constants =========
 
     const INITIAL_EXP: u64 = 0;
     const BASIC_REWARD_EXP: u64 = 5;
+
+    // ======== Errors =========
+
+    const ETaskAlreadyDone: u64 = 0;
 
     // ======== Structs =========
 
@@ -19,8 +24,8 @@ module loyalty_gm::user_store {
         id: UID,
         token_id: ID,
         owner: address,
-        // active_tasks: VecSet<name>
-        // done_tasks: VecSet<name>
+        active_tasks: VecSet<ID>,
+        done_tasks: VecSet<ID>,
         // reset when claim
         claimable_exp: u64,
     }
@@ -40,6 +45,8 @@ module loyalty_gm::user_store {
         let data = User {
             id: object::new(ctx),
             token_id,
+            active_tasks: vec_set::empty(),
+            done_tasks: vec_set::empty(),
             owner,
             claimable_exp: INITIAL_EXP,
         };
@@ -56,6 +63,12 @@ module loyalty_gm::user_store {
     public(friend) fun reset_user_exp(store: &mut Table<address, User>, owner: address) {
         let user_data = table::borrow_mut<address, User>(store, owner);
         user_data.claimable_exp = INITIAL_EXP;
+    }
+
+    public(friend) fun start_task(store: &mut Table<address, User>, task_id: ID, owner: address) {
+        let user_data = table::borrow_mut<address, User>(store, owner);
+        assert!(!vec_set::contains(&user_data.done_tasks, &task_id), ETaskAlreadyDone);
+        vec_set::insert(&mut user_data.active_tasks, task_id)
     }
 
     public fun size(store: &Table<ID, User>): u64 {

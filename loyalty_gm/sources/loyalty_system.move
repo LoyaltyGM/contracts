@@ -76,7 +76,7 @@ module loyalty_gm::loyalty_system {
         name: string::String,
     }
 
-    // ======= Public functions =======
+    // ======== Admin Functions =========
 
     public entry fun create_loyalty_system(
         name: vector<u8>, 
@@ -119,46 +119,6 @@ module loyalty_gm::loyalty_system {
         system_store::add_system(system_store, object::uid_to_inner(&loyalty_system.id), ctx);
         transfer::share_object(loyalty_system);
     }
-
-    public(friend) fun get_mut_user_store(loyalty_system: &mut LoyaltySystem): &mut Table<address, User>{
-        ofield::borrow_mut(&mut loyalty_system.id, USER_STORE_KEY)
-    }
-
-    public(friend) fun increment_total_minted(loyalty_system: &mut LoyaltySystem){
-        assert!(*get_total_minted(loyalty_system) <= *get_max_supply(loyalty_system), EMaxSupplyReached);
-        loyalty_system.total_minted = loyalty_system.total_minted + 1;
-    }
-
-    public fun get_name(loyalty_system: &LoyaltySystem): &string::String {
-        &loyalty_system.name
-    }
-
-    public fun get_max_supply(loyalty_system: &LoyaltySystem): &u64 {
-        &loyalty_system.max_supply 
-    }
-
-    public fun get_total_minted(loyalty_system: &LoyaltySystem): &u64 {
-        &loyalty_system.total_minted
-    }
-
-    public fun get_description(loyalty_system: &LoyaltySystem): &string::String {
-        &loyalty_system.description
-    }
-
-    public fun get_url(loyalty_system: &LoyaltySystem): &Url{
-        &loyalty_system.url
-    }
-
-    public fun get_user_store(loyalty_system: &LoyaltySystem): &Table<address, User> {
-        ofield::borrow(&loyalty_system.id, USER_STORE_KEY)
-    }
-
-    // public entry start_task(loyalty_system, task_name,)
-
-    // public entry verify_task(loyalty_system, task_name)
-    // VerifierCap
-
-    // ======== Admin Functions =========
 
     public entry fun update_loyalty_system_name(admin_cap: &AdminCap, loyalty_system: &mut LoyaltySystem, new_name: vector<u8> ){
         assert!(length(&new_name) <= MAX_NAME_LENGTH, ETextOverflow);
@@ -237,7 +197,53 @@ module loyalty_gm::loyalty_system {
         task_store::remove_task(&mut loyalty_system.tasks, task_id);
     }
 
-    // ======= Private and Utility functions =======
+
+    // ======= User functions =======
+
+    public entry fun start_task(loyalty_system: &mut LoyaltySystem, task_id: ID, ctx: &mut TxContext) {
+        user_store::start_task(get_mut_user_store(loyalty_system), task_id, tx_context::sender(ctx))
+    }
+
+    // public entry verify_task(loyalty_system, task_name)
+    // VerifierCapf
+
+
+    // ======= Public functions =======
+
+    public(friend) fun get_mut_user_store(loyalty_system: &mut LoyaltySystem): &mut Table<address, User>{
+        ofield::borrow_mut(&mut loyalty_system.id, USER_STORE_KEY)
+    }
+
+    public(friend) fun increment_total_minted(loyalty_system: &mut LoyaltySystem){
+        assert!(*get_total_minted(loyalty_system) <= *get_max_supply(loyalty_system), EMaxSupplyReached);
+        loyalty_system.total_minted = loyalty_system.total_minted + 1;
+    }
+
+    public fun get_name(loyalty_system: &LoyaltySystem): &string::String {
+        &loyalty_system.name
+    }
+
+    public fun get_max_supply(loyalty_system: &LoyaltySystem): &u64 {
+        &loyalty_system.max_supply 
+    }
+
+    public fun get_total_minted(loyalty_system: &LoyaltySystem): &u64 {
+        &loyalty_system.total_minted
+    }
+
+    public fun get_description(loyalty_system: &LoyaltySystem): &string::String {
+        &loyalty_system.description
+    }
+
+    public fun get_url(loyalty_system: &LoyaltySystem): &Url{
+        &loyalty_system.url
+    }
+
+    public fun get_user_store(loyalty_system: &LoyaltySystem): &Table<address, User> {
+        ofield::borrow(&loyalty_system.id, USER_STORE_KEY)
+    }
+
+    // ======= Private functions =======
 
     fun check_admin(admin_cap: &AdminCap, system: &LoyaltySystem) {
         assert!(object::borrow_id(system) == &admin_cap.loyalty_system, EAdminOnly);
