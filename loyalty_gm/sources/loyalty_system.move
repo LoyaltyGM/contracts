@@ -58,7 +58,7 @@ module loyalty_gm::loyalty_system {
 
         // tasks & rewards
         max_levels: u64,
-        tasks: VecMap<String, Task>,
+        tasks: VecMap<ID, Task>,
         rewards: VecMap<u64, Reward>,
 
         // --dynamic fields--
@@ -207,7 +207,7 @@ module loyalty_gm::loyalty_system {
         arguments: vector<vector<u8>>,
         start: u64,
         end: u64,
-        _: &mut TxContext
+        ctx: &mut TxContext
     ) {
         check_admin(admin_cap, loyalty_system);
 
@@ -222,18 +222,19 @@ module loyalty_gm::loyalty_system {
             arguments,
             start,
             end,
+            ctx,
         );
     }
 
     public entry fun remove_task(
         admin_cap: &AdminCap, 
         loyalty_system: &mut LoyaltySystem, 
-        name: vector<u8>,
+        task_id: ID,
         _: &mut TxContext
     ) {
         check_admin(admin_cap, loyalty_system);
 
-        task_store::remove_task(&mut loyalty_system.tasks, name);
+        task_store::remove_task(&mut loyalty_system.tasks, task_id);
     }
 
     // ======= Private and Utility functions =======

@@ -7,8 +7,10 @@ module loyalty_gm::task_store {
 
     use std::string::{Self, String};
 
-    use sui::object::{ID};
+    use sui::object::{Self, ID};
     use sui::vec_map::{Self, VecMap};
+    use sui::tx_context::{TxContext};
+
 
     use loyalty_gm::utils::{Self};
 
@@ -25,6 +27,7 @@ module loyalty_gm::task_store {
     // ======== Structs =========
 
     struct Task has store, drop {
+        id: ID,
         name: String,
         description: String,
         reward_exp: u64,
@@ -44,12 +47,12 @@ module loyalty_gm::task_store {
     
     // ======== Friend functions =========
 
-    public(friend) fun empty(): VecMap<String, Task> {  
-        vec_map::empty<String, Task>()
+    public(friend) fun empty(): VecMap<ID, Task> {  
+        vec_map::empty<ID, Task>()
     }
 
     public(friend) fun add_task(
-        store: &mut VecMap<String, Task>,
+        store: &mut VecMap<ID, Task>,
         name: vector<u8>,
         description: vector<u8>,
         reward_exp: u64, 
@@ -59,12 +62,17 @@ module loyalty_gm::task_store {
         arguments: vector<vector<u8>>,
         start: u64,
         end: u64,
+        ctx: &mut TxContext
     ) {
         assert!(vec_map::size(store) <= MAX_TASKS, EMaxTasksReached);
         
-        let name_key = string::utf8(name);
+        let uid = object::new(ctx);
+        let id = object::uid_to_inner(&uid);
+        object::delete(uid);
+
         let task = Task {
-            name: name_key,
+            id,
+            name: string::utf8(name),
             description: string::utf8(description),
             reward_exp,
             package_id,
@@ -74,10 +82,10 @@ module loyalty_gm::task_store {
             start,
             end,
         };
-        vec_map::insert(store, name_key, task);
+        vec_map::insert(store, id, task);
     }
 
-    public(friend) fun remove_task(store: &mut VecMap<String, Task>, name_key: vector<u8>) {
-        vec_map::remove(store, &string::utf8(name_key));
+    public(friend) fun remove_task(store: &mut VecMap<ID, Task>, task_id: ID) {
+        vec_map::remove(store, &task_id);
     }
 }
