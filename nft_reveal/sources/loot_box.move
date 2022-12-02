@@ -218,7 +218,6 @@ module nft_reveal::loot_box {
             _box_opened: 0,
         };
 
-        transfer::share_object(collection);
-        
+        transfer::share_object(collection);  
     }
 }
