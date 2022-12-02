@@ -83,7 +83,7 @@ module loyalty_gm::user_store {
     ) {
         let user_data = table::borrow_mut<address, User>(store, owner);
 
-        assert!(!vec_set::contains(&user_data.active_tasks, &task_id), ETaskNotStarted);
+        assert!(vec_set::contains(&user_data.active_tasks, &task_id), ETaskNotStarted);
         assert!(!vec_set::contains(&user_data.done_tasks, &task_id), ETaskAlreadyDone);
 
         vec_set::remove(&mut user_data.active_tasks, &task_id);
