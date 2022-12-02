@@ -75,7 +75,12 @@ module loyalty_gm::user_store {
         vec_set::insert(&mut user_data.active_tasks, task_id)
     }
 
-    public(friend) fun finish_task(store: &mut Table<address, User>, task_id: ID, owner: address) {
+    public(friend) fun finish_task(
+        store: &mut Table<address, User>, 
+        task_id: ID, 
+        owner: address,
+        reward_exp: u64
+    ) {
         let user_data = table::borrow_mut<address, User>(store, owner);
 
         assert!(!vec_set::contains(&user_data.active_tasks, &task_id), ETaskNotStarted);

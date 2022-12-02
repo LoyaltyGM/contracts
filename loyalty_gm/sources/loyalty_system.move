@@ -204,14 +204,20 @@ module loyalty_gm::loyalty_system {
         task_store::remove_task(&mut loyalty_system.tasks, task_id);
     }
 
-    public entry fun verify_task(
+    public entry fun finish_task(
         _: &VerifierCap,
         loyalty_system: &mut LoyaltySystem, 
         task_id: ID, 
         user: address
     ) {
-        // let task = 
-
+        let reward_exp = task_store::get_task_reward(&loyalty_system.tasks, &task_id);
+        let user_store = get_mut_user_store(loyalty_system);
+        user_store::finish_task(
+            user_store,
+            task_id,
+            user,
+            reward_exp
+        )
     }
 
 
