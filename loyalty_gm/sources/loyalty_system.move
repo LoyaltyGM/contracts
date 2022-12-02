@@ -39,6 +39,10 @@ module loyalty_gm::loyalty_system {
         id: UID,
         loyalty_system: ID,
     }
+
+    struct VerifierCap has key, store {
+        id: UID,
+    }
     
     struct LoyaltySystem has key {
         // collection
@@ -74,6 +78,13 @@ module loyalty_gm::loyalty_system {
         creator: address,
         // The name of the NFT
         name: string::String,
+    }
+
+    // ======== Init =========
+    fun init(ctx: &mut TxContext) {
+        transfer::transfer(VerifierCap {
+            id: object::new(ctx)
+        }, tx_context::sender(ctx))
     }
 
     // ======== Admin Functions =========
@@ -165,8 +176,6 @@ module loyalty_gm::loyalty_system {
         module_name: vector<u8>,
         function_name: vector<u8>,
         arguments: vector<vector<u8>>,
-        start: u64,
-        end: u64,
         ctx: &mut TxContext
     ) {
         check_admin(admin_cap, loyalty_system);
@@ -180,8 +189,6 @@ module loyalty_gm::loyalty_system {
             module_name,
             function_name,
             arguments,
-            start,
-            end,
             ctx,
         );
     }
@@ -197,16 +204,22 @@ module loyalty_gm::loyalty_system {
         task_store::remove_task(&mut loyalty_system.tasks, task_id);
     }
 
+    public entry fun verify_task(
+        _: &VerifierCap,
+        loyalty_system: &mut LoyaltySystem, 
+        task_id: ID, 
+        user: address
+    ) {
+        // let task = 
+
+    }
+
 
     // ======= User functions =======
 
     public entry fun start_task(loyalty_system: &mut LoyaltySystem, task_id: ID, ctx: &mut TxContext) {
         user_store::start_task(get_mut_user_store(loyalty_system), task_id, tx_context::sender(ctx))
     }
-
-    // public entry verify_task(loyalty_system, task_name)
-    // VerifierCapf
-
 
     // ======= Public functions =======
 

@@ -12,11 +12,11 @@ module loyalty_gm::user_store {
     // ======== Constants =========
 
     const INITIAL_EXP: u64 = 0;
-    const BASIC_REWARD_EXP: u64 = 5;
 
     // ======== Errors =========
 
     const ETaskAlreadyDone: u64 = 0;
+    const ETaskNotStarted: u64 = 1;
 
     // ======== Structs =========
 
@@ -55,9 +55,13 @@ module loyalty_gm::user_store {
     }
 
     // Not currently used anywhere
-    public(friend) fun update_user_exp(store: &mut Table<address, User>, owner: address) {
+    public(friend) fun update_user_exp(
+        store: &mut Table<address, User>, 
+        owner: address,
+        reward_exp: u64
+    ) {
         let user_data = table::borrow_mut<address, User>(store, owner);
-        user_data.claimable_exp = user_data.claimable_exp + BASIC_REWARD_EXP;
+        user_data.claimable_exp = user_data.claimable_exp + reward_exp;
     }
 
     public(friend) fun reset_user_exp(store: &mut Table<address, User>, owner: address) {
@@ -69,6 +73,16 @@ module loyalty_gm::user_store {
         let user_data = table::borrow_mut<address, User>(store, owner);
         assert!(!vec_set::contains(&user_data.done_tasks, &task_id), ETaskAlreadyDone);
         vec_set::insert(&mut user_data.active_tasks, task_id)
+    }
+
+    public(friend) fun finish_task(store: &mut Table<address, User>, task_id: ID, owner: address) {
+        let user_data = table::borrow_mut<address, User>(store, owner);
+
+        assert!(!vec_set::contains(&user_data.active_tasks, &task_id), ETaskNotStarted);
+        assert!(!vec_set::contains(&user_data.done_tasks, &task_id), ETaskAlreadyDone);
+
+        vec_set::remove(&mut user_data.active_tasks, &task_id);
+        vec_set::insert(&mut user_data.done_tasks, task_id)
     }
 
     public fun size(store: &Table<ID, User>): u64 {

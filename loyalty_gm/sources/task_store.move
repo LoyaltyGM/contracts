@@ -35,9 +35,6 @@ module loyalty_gm::task_store {
         module_name: String,
         function_name: String,
         arguments: vector<String>,
-        // timestamp
-        start: u64,
-        end: u64,
     }
 
     // ======== Public functions =========
@@ -60,8 +57,6 @@ module loyalty_gm::task_store {
         module_name: vector<u8>,
         function_name: vector<u8>,
         arguments: vector<vector<u8>>,
-        start: u64,
-        end: u64,
         ctx: &mut TxContext
     ) {
         assert!(vec_map::size(store) <= MAX_TASKS, EMaxTasksReached);
@@ -79,13 +74,15 @@ module loyalty_gm::task_store {
             module_name: string::utf8(module_name),
             function_name: string::utf8(function_name),
             arguments: utils::to_string_vec(arguments),
-            start,
-            end,
         };
         vec_map::insert(store, id, task);
     }
 
     public(friend) fun remove_task(store: &mut VecMap<ID, Task>, task_id: ID) {
         vec_map::remove(store, &task_id);
+    }
+
+    public fun get_task_reward(store: &VecMap<ID, Task>, task_id: &ID): u64 {
+       vec_map::get(store, task_id).reward_exp
     }
 }
