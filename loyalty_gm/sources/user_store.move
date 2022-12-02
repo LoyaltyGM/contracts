@@ -87,7 +87,9 @@ module loyalty_gm::user_store {
         assert!(!vec_set::contains(&user_data.done_tasks, &task_id), ETaskAlreadyDone);
 
         vec_set::remove(&mut user_data.active_tasks, &task_id);
-        vec_set::insert(&mut user_data.done_tasks, task_id)
+        vec_set::insert(&mut user_data.done_tasks, task_id);
+
+        update_user_exp(store, owner, reward_exp)
     }
 
     public fun size(store: &Table<ID, User>): u64 {
