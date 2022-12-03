@@ -107,7 +107,7 @@ module nft_reveal::loot_box {
 
     // GETTER  
     // BoxCollection
-    public fun owner(collection: &BoxCollection): address {
+    public fun get_owner(collection: &BoxCollection): address {
         collection.creator
     }
 
