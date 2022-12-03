@@ -105,6 +105,8 @@ module nft_reveal::loot_box {
 
     // ======== Public functions =========
 
+    // GETTER  
+    // BoxCollection
     public fun owner(collection: &BoxCollection): address {
         collection.creator
     }
@@ -117,6 +119,13 @@ module nft_reveal::loot_box {
         collection._box_opened
     }
 
+    // LootBox
+    public fun get_box_name(box: &Loot): String {
+        box.name
+    }
+
+
+    // SETTER
     public entry fun buy_box(
         collection: &mut BoxCollection, 
         paid: Coin<SUI>, 
@@ -168,7 +177,7 @@ module nft_reveal::loot_box {
         let rarity = get_loot_rarity(score, collection);
         Loot {
             id: object::new(ctx),
-            name: string::utf8(b"LOOT!!"),
+            name: string::utf8(b"LOOT"),
             rarity: rarity,
             score: score,
             url: url::new_unsafe_from_bytes(LOOT_URL)
@@ -202,14 +211,14 @@ module nft_reveal::loot_box {
     }
     // https://stackoverflow.com/questions/74513153/test-for-init-function-from-examples-doesnt-works
     #[test_only]
-    public fun create_lootbox(ctx: &mut TxContext) {
+    public fun create_lootbox(ctx: &mut TxContext, max_supply: u64) {
         let rarity_types = rarity_type();
         let rarity_weights = rarity_weight();
 
         let collection = BoxCollection {
             id: object::new(ctx),
             creator: tx_context::sender(ctx),
-            box_max_supply: 1000,
+            box_max_supply: max_supply,
             box_url: url::new_unsafe_from_bytes(BOX_URL),
             box_price: 10000000,
             rarity_types: rarity_types,
