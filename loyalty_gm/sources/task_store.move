@@ -16,8 +16,8 @@ module loyalty_gm::task_store {
 
     // ======== Constants =========
 
-    const INITIAL_EXP: u64 = 0;
-    const BASIC_REWARD_EXP: u64 = 5;
+    const INITIAL_XP: u64 = 0;
+    const BASIC_REWARD_XP: u64 = 5;
     const MAX_TASKS: u64 = 100;
 
     // ======== Error codes =========
@@ -38,9 +38,6 @@ module loyalty_gm::task_store {
     }
 
     // ======== Public functions =========
-
-    // public entry start_task(name,)
-
     
     // ======== Friend functions =========
 

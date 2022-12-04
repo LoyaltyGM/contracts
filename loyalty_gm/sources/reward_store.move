@@ -11,8 +11,8 @@ module loyalty_gm::reward_store {
 
     // ======== Constants =========
 
-    const INITIAL_EXP: u64 = 0;
-    const BASIC_REWARD_EXP: u64 = 5;
+    const INITIAL_XP: u64 = 0;
+    const BASIC_REWARD_XP: u64 = 5;
 
     // ======== Structs =========
 

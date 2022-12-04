@@ -11,13 +11,13 @@ module loyalty_gm::loyalty_token {
     // ======== Constants =========
 
     const INITIAL_LVL: u8 = 0;
-    const INITIAL_EXP: u64 = 0;
+    const INITIAL_XP: u64 = 0;
 
     // ======== Error codes =========
 
     const ENotUniqueAddress: u64 = 0;
     const ETooManyMint: u64 = 1;
-    const ENoClaimableExp: u64 = 2;
+    const ENoClaimableXp: u64 = 2;
     const EAdminOnly: u64 = 3;
     const EInvalidTokenStore: u64 = 4;
 
@@ -34,7 +34,7 @@ module loyalty_gm::loyalty_token {
         // Level of nft [0-255]
         level: u8,
         // Expiration timestamp (UNIX time) - app specific
-        current_exp: u64,
+        xp: u64,
         // TODO:
         // array of lvl points 
         // pointsToNextLvl: u128,
@@ -49,10 +49,10 @@ module loyalty_gm::loyalty_token {
         name: string::String,
     }
 
-    struct ClaimExpEvent has copy, drop {
+    struct ClaimXpEvent has copy, drop {
         token_id: ID,
         claimer: address,
-        claimed_exp: u64,
+        claimed_xp: u64,
     }
 
 
@@ -71,7 +71,7 @@ module loyalty_gm::loyalty_token {
             description: *loyalty_system::get_description(ls),
             url: *loyalty_system::get_url(ls),
             level: INITIAL_LVL,
-            current_exp: INITIAL_EXP,
+            xp: INITIAL_XP,
         };
         let sender = tx_context::sender(ctx);
 
@@ -92,25 +92,26 @@ module loyalty_gm::loyalty_token {
         ctx: &mut TxContext
     ) {
         let sender = tx_context::sender(ctx);
-        let claimable_exp = user_store::get_user_exp(loyalty_system::get_user_store(ls), sender);
-        assert!(claimable_exp > 0, ENoClaimableExp);
+        let claimable_xp = user_store::get_user_xp(loyalty_system::get_user_store(ls), sender);
+        assert!(claimable_xp > 0, ENoClaimableXp);
 
-        emit(ClaimExpEvent {
+        emit(ClaimXpEvent {
             token_id: object::id(token),
             claimer: sender,
-            claimed_exp: claimable_exp,
+            claimed_xp: claimable_xp,
         });
 
-        user_store::reset_user_exp(loyalty_system::get_mut_user_store(ls), sender);
+        user_store::reset_user_xp(loyalty_system::get_mut_user_store(ls), sender);
 
-        update_token_exp(claimable_exp, token);
+        update_token_xp(claimable_xp, token);
     }
 
     // ======== Admin Functions =========
 
     // ======= Private and Utility functions =======
 
-    fun update_token_exp(exp_to_add: u64, token: &mut LoyaltyToken) {
-        token.current_exp = token.current_exp + exp_to_add;
+    fun update_token_xp(xp_to_add: u64, token: &mut LoyaltyToken) {
+        let new_xp = token.xp + xp_to_add;
+        token.xp = new_xp;
     }
 }

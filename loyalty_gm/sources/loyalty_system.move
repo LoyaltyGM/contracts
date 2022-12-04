@@ -22,7 +22,6 @@ module loyalty_gm::loyalty_system {
     const USER_STORE_KEY: vector<u8> = b"user_store";
     const MAX_NAME_LENGTH: u64 = 32;
     const MAX_DESCRIPTION_LENGTH: u64 = 255;
-    const BASIC_REWARD_EXP: u64 = 5;
     const BASIC_MAX_LEVELS: u64 = 30;
 
     // ======== Error codes =========
@@ -171,7 +170,7 @@ module loyalty_gm::loyalty_system {
         loyalty_system: &mut LoyaltySystem,
         name: vector<u8>, 
         description: vector<u8>, 
-        reward_exp: u64, 
+        reward_xp: u64, 
         package_id: ID,
         module_name: vector<u8>,
         function_name: vector<u8>,
@@ -184,7 +183,7 @@ module loyalty_gm::loyalty_system {
             &mut loyalty_system.tasks, 
             name, 
             description, 
-            reward_exp,
+            reward_xp,
             package_id,
             module_name,
             function_name,
@@ -210,13 +209,13 @@ module loyalty_gm::loyalty_system {
         task_id: ID, 
         user: address
     ) {
-        let reward_exp = task_store::get_task_reward(&loyalty_system.tasks, &task_id);
+        let reward_xp = task_store::get_task_reward(&loyalty_system.tasks, &task_id);
         let user_store = get_mut_user_store(loyalty_system);
         user_store::finish_task(
             user_store,
             task_id,
             user,
-            reward_exp
+            reward_xp
         )
     }
 

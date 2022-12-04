@@ -11,7 +11,7 @@ module loyalty_gm::user_store {
 
     // ======== Constants =========
 
-    const INITIAL_EXP: u64 = 0;
+    const INITIAL_XP: u64 = 0;
 
     // ======== Errors =========
 
@@ -27,7 +27,7 @@ module loyalty_gm::user_store {
         done_tasks: VecSet<ID>,
         // resetting
         // rewards:
-        claimable_exp: u64,
+        claimable_xp: u64,
     }
 
     // ======== Public functions =========
@@ -43,29 +43,28 @@ module loyalty_gm::user_store {
     ) {
         let owner = tx_context::sender(ctx);
         let data = User {
-            // id: object::new(ctx),
             token_id,
             active_tasks: vec_set::empty(),
             done_tasks: vec_set::empty(),
             owner,
-            claimable_exp: INITIAL_EXP,
+            claimable_xp: INITIAL_XP,
         };
 
         table::add(store, owner, data)
     }
 
-    public(friend) fun update_user_exp(
+    public(friend) fun update_user_xp(
         store: &mut Table<address, User>, 
         owner: address,
-        reward_exp: u64
+        reward_xp: u64
     ) {
         let user_data = table::borrow_mut<address, User>(store, owner);
-        user_data.claimable_exp = user_data.claimable_exp + reward_exp;
+        user_data.claimable_xp = user_data.claimable_xp + reward_xp;
     }
 
-    public(friend) fun reset_user_exp(store: &mut Table<address, User>, owner: address) {
+    public(friend) fun reset_user_xp(store: &mut Table<address, User>, owner: address) {
         let user_data = table::borrow_mut<address, User>(store, owner);
-        user_data.claimable_exp = INITIAL_EXP;
+        user_data.claimable_xp = INITIAL_XP;
     }
 
     public(friend) fun start_task(store: &mut Table<address, User>, task_id: ID, owner: address) {
@@ -78,7 +77,7 @@ module loyalty_gm::user_store {
         store: &mut Table<address, User>, 
         task_id: ID, 
         owner: address,
-        reward_exp: u64
+        reward_xp: u64
     ) {
         let user_data = table::borrow_mut<address, User>(store, owner);
 
@@ -88,7 +87,7 @@ module loyalty_gm::user_store {
         vec_set::remove(&mut user_data.active_tasks, &task_id);
         vec_set::insert(&mut user_data.done_tasks, task_id);
 
-        update_user_exp(store, owner, reward_exp)
+        update_user_xp(store, owner, reward_xp)
     }
 
     public fun size(store: &Table<ID, User>): u64 {
@@ -103,8 +102,8 @@ module loyalty_gm::user_store {
         table::contains(table, owner)
     }
 
-    public fun get_user_exp(table: &Table<address, User>, owner: address): u64 {
+    public fun get_user_xp(table: &Table<address, User>, owner: address): u64 {
         let user_data = table::borrow<address, User>(table, owner);
-        user_data.claimable_exp
+        user_data.claimable_xp
     }
 }
