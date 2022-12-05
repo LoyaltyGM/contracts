@@ -1,7 +1,7 @@
 module loyalty_gm::loyalty_system {
     friend loyalty_gm::loyalty_token;
 
-    use std::vector::{Self, length};
+    use std::vector::{length};
     use std::string::{Self, String};
     use sui::object::{Self, UID, ID};
     use sui::transfer;
@@ -22,7 +22,7 @@ module loyalty_gm::loyalty_system {
     const USER_STORE_KEY: vector<u8> = b"user_store";
     const MAX_NAME_LENGTH: u64 = 32;
     const MAX_DESCRIPTION_LENGTH: u64 = 255;
-    const BASIC_MAX_LVL: u8 = 30;
+    const BASIC_MAX_LVL: u64 = 100;
 
     // ======== Error codes =========
 
@@ -60,9 +60,10 @@ module loyalty_gm::loyalty_system {
 
 
         // tasks & rewards
-        max_lvl: u8,
+        max_lvl: u64,
+        // lvl_threshold: vector<u64>,
         tasks: VecMap<ID, Task>,
-        rewards: VecMap<u8, Reward>,
+        rewards: VecMap<u64, Reward>,
 
         // --dynamic fields--
         // user_store: Table<address, User>,
@@ -93,11 +94,13 @@ module loyalty_gm::loyalty_system {
         description: vector<u8>, 
         url: vector<u8>,
         max_supply: u64,
+        max_lvl: u64,
         system_store: &mut SystemStore<SYSTEM_STORE>,
         ctx: &mut TxContext,
     ) {
         assert!(length(&name) <= MAX_NAME_LENGTH, ETextOverflow);
         assert!(length(&description) <= MAX_DESCRIPTION_LENGTH, ETextOverflow);
+        assert!(max_lvl <= BASIC_MAX_LVL, EInvalidLevel);
 
         let creator = tx_context::sender(ctx);
 
@@ -109,7 +112,8 @@ module loyalty_gm::loyalty_system {
             total_minted: 0,
             max_supply,
             creator,
-            max_lvl: BASIC_MAX_LVL,
+            max_lvl,
+            // lvl_threshold: create_threshold_vec(max_lvl),
             tasks: task_store::empty(),
             rewards: reward_store::empty(),
         };
@@ -152,14 +156,14 @@ module loyalty_gm::loyalty_system {
         loyalty_system.max_supply = new_max_supply;
     }
 
-    public entry fun add_reward(admin_cap: &AdminCap, level: u8, description: vector<u8>, loyalty_system: &mut LoyaltySystem, _: &mut TxContext) {
+    public entry fun add_reward(admin_cap: &AdminCap, level: u64, description: vector<u8>, loyalty_system: &mut LoyaltySystem, _: &mut TxContext) {
         check_admin(admin_cap, loyalty_system);
         assert!(level <= loyalty_system.max_lvl, EInvalidLevel);
 
         reward_store::add_reward(&mut loyalty_system.rewards, level, description);
     }
 
-    public entry fun remove_reward(admin_cap: &AdminCap, level: u8, loyalty_system: &mut LoyaltySystem, _: &mut TxContext) {
+    public entry fun remove_reward(admin_cap: &AdminCap, level: u64, loyalty_system: &mut LoyaltySystem, _: &mut TxContext) {
         check_admin(admin_cap, loyalty_system);
 
         reward_store::remove_reward(&mut loyalty_system.rewards, level);
@@ -233,7 +237,7 @@ module loyalty_gm::loyalty_system {
     }
 
     public(friend) fun increment_total_minted(loyalty_system: &mut LoyaltySystem){
-        assert!(*get_total_minted(loyalty_system) <= *get_max_supply(loyalty_system), EMaxSupplyReached);
+        assert!(get_total_minted(loyalty_system) <= get_max_supply(loyalty_system), EMaxSupplyReached);
         loyalty_system.total_minted = loyalty_system.total_minted + 1;
     }
 
@@ -241,12 +245,12 @@ module loyalty_gm::loyalty_system {
         &loyalty_system.name
     }
 
-    public fun get_max_supply(loyalty_system: &LoyaltySystem): &u64 {
-        &loyalty_system.max_supply 
+    public fun get_max_supply(loyalty_system: &LoyaltySystem): u64 {
+        loyalty_system.max_supply 
     }
 
-    public fun get_total_minted(loyalty_system: &LoyaltySystem): &u64 {
-        &loyalty_system.total_minted
+    public fun get_total_minted(loyalty_system: &LoyaltySystem): u64 {
+        loyalty_system.total_minted
     }
 
     public fun get_description(loyalty_system: &LoyaltySystem): &string::String {
@@ -259,6 +263,10 @@ module loyalty_gm::loyalty_system {
 
     public fun get_user_store(loyalty_system: &LoyaltySystem): &Table<address, User> {
         ofield::borrow(&loyalty_system.id, USER_STORE_KEY)
+    }
+
+    public fun get_max_lvl(loyalty_system: &LoyaltySystem): u64 {
+        loyalty_system.max_lvl
     }
 
     // ======= Private functions =======

@@ -17,17 +17,17 @@ module loyalty_gm::reward_store {
     // ======== Structs =========
 
     struct Reward has store, drop {
-        level: u8,
+        level: u64,
         description: String,
     }
 
     // ======== Public functions =========
 
-    public(friend) fun empty(): VecMap<u8, Reward> {  
-        vec_map::empty<u8, Reward>()
+    public(friend) fun empty(): VecMap<u64, Reward> {  
+        vec_map::empty<u64, Reward>()
     }
 
-    public(friend) fun add_reward(store: &mut VecMap<u8, Reward>, level: u8, description: vector<u8>) {
+    public(friend) fun add_reward(store: &mut VecMap<u64, Reward>, level: u64, description: vector<u8>) {
         let reward_info = Reward {
             level, 
             description: string::utf8(description)
@@ -35,7 +35,7 @@ module loyalty_gm::reward_store {
         vec_map::insert(store, level, reward_info);
     }
 
-    public(friend) fun remove_reward(store: &mut VecMap<u8, Reward>, level: u8) {
+    public(friend) fun remove_reward(store: &mut VecMap<u64, Reward>, level: u64) {
         vec_map::remove(store, &level);
     }
 }

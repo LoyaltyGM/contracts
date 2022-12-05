@@ -5,13 +5,15 @@ module loyalty_gm::loyalty_token {
     use sui::url::{Url};
     use sui::tx_context::{Self, TxContext};
     use sui::event::{emit};
+    use sui::math::{Self};
     use loyalty_gm::loyalty_system::{Self, LoyaltySystem};
     use loyalty_gm::user_store::{Self};
 
     // ======== Constants =========
 
-    const INITIAL_LVL: u8 = 1;
+    const INITIAL_LVL: u64 = 0;
     const INITIAL_XP: u64 = 0;
+    const LVL_DIVIDER: u64 = 10;
 
     // ======== Error codes =========
 
@@ -32,7 +34,7 @@ module loyalty_gm::loyalty_token {
         url: Url,
 
         // Level of nft [0-255]
-        lvl: u8,
+        lvl: u64,
         // Expiration timestamp (UNIX time) - app specific
         xp: u64,
         // TODO:
@@ -105,6 +107,7 @@ module loyalty_gm::loyalty_token {
         user_store::reset_user_xp(loyalty_system::get_mut_user_store(ls), sender);
 
         update_token_xp(claimable_xp, token);
+        update_token_lvl(ls, token);
     }
 
     // ======== Admin Functions =========
@@ -114,5 +117,11 @@ module loyalty_gm::loyalty_token {
     fun update_token_xp(xp_to_add: u64, token: &mut LoyaltyToken) {
         let new_xp = token.xp + xp_to_add;
         token.xp = new_xp;
+    }
+
+    fun update_token_lvl(ls: &mut LoyaltySystem, token: &mut LoyaltyToken) {
+        let max_lvl = loyalty_system::get_max_lvl(ls);
+        let lvl = math::sqrt(token.xp/LVL_DIVIDER);
+        token.lvl = if (lvl <= max_lvl) lvl else max_lvl;
     }
 }
