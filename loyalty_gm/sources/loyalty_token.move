@@ -32,14 +32,10 @@ module loyalty_gm::loyalty_token {
         name: String,
         description: String,
         url: Url,
-
-        // Level of nft [0-255]
+        
         lvl: u64,
-        // Expiration timestamp (UNIX time) - app specific
         xp: u64,
-        // TODO:
-        // array of lvl points 
-        // pointsToNextLvl: u128,
+        xp_to_next_lvl: u64,
     }
 
     // ======== Events =========
@@ -73,8 +69,8 @@ module loyalty_gm::loyalty_token {
             description: *loyalty_system::get_description(ls),
             url: *loyalty_system::get_url(ls),
             lvl: INITIAL_LVL,
-            // lvl_threshold: INITIAL_LVL_THRESHOLD,
             xp: INITIAL_XP,
+            xp_to_next_lvl: get_xp_to_next_lvl(INITIAL_LVL, INITIAL_XP),
         };
         let sender = tx_context::sender(ctx);
 
@@ -106,22 +102,37 @@ module loyalty_gm::loyalty_token {
 
         user_store::reset_user_xp(loyalty_system::get_mut_user_store(ls), sender);
 
-        update_token_xp(claimable_xp, token);
-        update_token_lvl(ls, token);
+        update_token_stats(claimable_xp, ls, token);
     }
 
     // ======== Admin Functions =========
 
     // ======= Private and Utility functions =======
 
-    fun update_token_xp(xp_to_add: u64, token: &mut LoyaltyToken) {
+    fun update_token_stats(
+        xp_to_add: u64,
+        ls: &mut LoyaltySystem,
+        token: &mut LoyaltyToken,
+    ) {
         let new_xp = token.xp + xp_to_add;
+        let new_lvl = get_lvl_by_xp(new_xp);
+
         token.xp = new_xp;
+        token.xp_to_next_lvl = get_xp_to_next_lvl(new_lvl, new_xp);
+
+        let max_lvl = loyalty_system::get_max_lvl(ls);
+        token.lvl = if (new_lvl <= max_lvl) new_lvl else max_lvl;
+    }
+    
+    fun get_lvl_by_xp(xp: u64): u64 {
+        math::sqrt(xp/LVL_DIVIDER)
     }
 
-    fun update_token_lvl(ls: &mut LoyaltySystem, token: &mut LoyaltyToken) {
-        let max_lvl = loyalty_system::get_max_lvl(ls);
-        let lvl = math::sqrt(token.xp/LVL_DIVIDER);
-        token.lvl = if (lvl <= max_lvl) lvl else max_lvl;
+    fun get_xp_by_lvl(lvl: u64): u64 {
+        lvl * lvl * LVL_DIVIDER
+    }
+
+    fun get_xp_to_next_lvl(lvl: u64, xp: u64): u64 {
+        get_xp_by_lvl(lvl + 1) - xp
     }
 }
