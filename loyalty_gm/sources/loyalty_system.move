@@ -156,7 +156,13 @@ module loyalty_gm::loyalty_system {
         loyalty_system.max_supply = new_max_supply;
     }
 
-    public entry fun add_reward(admin_cap: &AdminCap, level: u64, description: vector<u8>, loyalty_system: &mut LoyaltySystem, _: &mut TxContext) {
+    public entry fun add_reward(
+        admin_cap: &AdminCap, 
+        level: u64, 
+        description: vector<u8>, 
+        loyalty_system: &mut LoyaltySystem,
+         _: &mut TxContext
+    ) {
         check_admin(admin_cap, loyalty_system);
         assert!(level <= loyalty_system.max_lvl, EInvalidLevel);
 

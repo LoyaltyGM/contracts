@@ -13,7 +13,7 @@ module loyalty_gm::loyalty_token {
 
     const INITIAL_LVL: u64 = 0;
     const INITIAL_XP: u64 = 0;
-    const LVL_DIVIDER: u64 = 10;
+    const LVL_DIVIDER: u64 = 50;
 
     // ======== Error codes =========
 
