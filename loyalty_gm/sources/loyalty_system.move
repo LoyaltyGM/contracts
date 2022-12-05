@@ -159,6 +159,7 @@ module loyalty_gm::loyalty_system {
     public entry fun add_reward(
         admin_cap: &AdminCap, 
         level: u64, 
+        url: vector<u8>,
         description: vector<u8>, 
         loyalty_system: &mut LoyaltySystem,
          _: &mut TxContext
@@ -166,7 +167,12 @@ module loyalty_gm::loyalty_system {
         check_admin(admin_cap, loyalty_system);
         assert!(level <= loyalty_system.max_lvl, EInvalidLevel);
 
-        reward_store::add_reward(&mut loyalty_system.rewards, level, description);
+        reward_store::add_reward(
+            &mut loyalty_system.rewards, 
+            level, 
+            url,
+            description
+        );
     }
 
     public entry fun remove_reward(admin_cap: &AdminCap, level: u64, loyalty_system: &mut LoyaltySystem, _: &mut TxContext) {

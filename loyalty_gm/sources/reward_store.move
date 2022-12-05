@@ -8,6 +8,7 @@ module loyalty_gm::reward_store {
     use std::string::{Self, String};
 
     use sui::vec_map::{Self, VecMap};
+    use sui::url::{Self, Url};
 
     // ======== Constants =========
 
@@ -18,6 +19,7 @@ module loyalty_gm::reward_store {
 
     struct Reward has store, drop {
         level: u64,
+        url: Url,
         description: String,
     }
 
@@ -27,9 +29,15 @@ module loyalty_gm::reward_store {
         vec_map::empty<u64, Reward>()
     }
 
-    public(friend) fun add_reward(store: &mut VecMap<u64, Reward>, level: u64, description: vector<u8>) {
+    public(friend) fun add_reward(
+        store: &mut VecMap<u64, Reward>,
+        level: u64, 
+        url: vector<u8>,
+        description: vector<u8>
+    ) {
         let reward_info = Reward {
             level, 
+            url: url::new_unsafe_from_bytes(url),
             description: string::utf8(description)
         };
         vec_map::insert(store, level, reward_info);
