@@ -22,7 +22,7 @@ module loyalty_gm::loyalty_system {
     const USER_STORE_KEY: vector<u8> = b"user_store";
     const MAX_NAME_LENGTH: u64 = 32;
     const MAX_DESCRIPTION_LENGTH: u64 = 255;
-    const BASIC_MAX_LEVEL: u8 = 30;
+    const BASIC_MAX_LVL: u8 = 30;
 
     // ======== Error codes =========
 
@@ -60,7 +60,7 @@ module loyalty_gm::loyalty_system {
 
 
         // tasks & rewards
-        max_level: u8,
+        max_lvl: u8,
         tasks: VecMap<ID, Task>,
         rewards: VecMap<u8, Reward>,
 
@@ -109,7 +109,7 @@ module loyalty_gm::loyalty_system {
             total_minted: 0,
             max_supply,
             creator,
-            max_level: BASIC_MAX_LEVEL,
+            max_lvl: BASIC_MAX_LVL,
             tasks: task_store::empty(),
             rewards: reward_store::empty(),
         };
@@ -154,7 +154,7 @@ module loyalty_gm::loyalty_system {
 
     public entry fun add_reward(admin_cap: &AdminCap, level: u8, description: vector<u8>, loyalty_system: &mut LoyaltySystem, _: &mut TxContext) {
         check_admin(admin_cap, loyalty_system);
-        assert!(level <= loyalty_system.max_level, EInvalidLevel);
+        assert!(level <= loyalty_system.max_lvl, EInvalidLevel);
 
         reward_store::add_reward(&mut loyalty_system.rewards, level, description);
     }
