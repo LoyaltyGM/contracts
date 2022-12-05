@@ -3,7 +3,7 @@ module nft_reveal::loot_box {
 
     use std::string::{Self, String};
     use std::vector;
-
+    // use std::debug;
     use sui::event::{emit};
     use sui::object::{Self, UID, ID};
     use sui::transfer;
@@ -11,33 +11,43 @@ module nft_reveal::loot_box {
     use sui::url::{Self, Url};
     use sui::sui::SUI;
     use sui::coin::{Self, Coin};
+    use nft_reveal::store::{Self};
+    use sui::dynamic_object_field as dof;
+    use sui::table::{Self};
 
     // ======== Constants =========
     const LOW_RANGE: u64 = 1;
     const HIGH_RANGE: u64 = 100;
     const BOX_URL: vector<u8> = b"ipfs://QmZVAXP7B7ZukhCDR5uSivmagkY53QtGZnvPRgZtEjfZrv";
     const LOOT_URL: vector<u8> =  b"ipfs://QmVGYBzXTVzZFhJjtsd8bwBNJZ5drWwFF9XwsQJHFdbTkL";
+    const MAX_MINTED_PER_ADDRESS: u64 = 3;
+
+    const COUNTER_KEY: vector<u8> = b"_box_counter_per_acount";
 
     // ======== Errors =========
 
     const EAmountIncorrect: u64 = 0;
     const EMaxSupplyReaced: u64 = 1;
+    const EMaxMintedPerAddress: u64 = 2; 
 
     // ======== Events =========
-
+    /// Event. When minter buy a box.
     struct BuyBoxEvent has copy, drop {
         box_id: ID,
         buyer: address,
     }
-
+    
+    /// Event. When start box. 
     struct OpenBoxEvent has copy, drop {
         box_id: ID,
         loot_id: ID,
         opener: address,
+
     }
     
     // ======== Structs =========
-
+    /// NFT collection which registered here. 
+    /// dynamic field vecmap<address, u64>
     struct BoxCollection has key {
         id: UID,
         creator: address,
@@ -47,16 +57,18 @@ module nft_reveal::loot_box {
         rarity_types: vector<String>,
         rarity_weights: vector<u64>,
         // changable
+        //_box_counter_per_acount: vec_map<address, u64>,
         _box_minted: u64,
         _box_opened: u64,
     }
 
+    /// Unopened box after buy box 
     struct LootBox has key, store {
         id: UID,
         name: String,
         url: Url,
     }
-
+    /// Open loot with rarity options
     struct Loot has key, store {
         id: UID,
         name: String,
@@ -99,7 +111,7 @@ module nft_reveal::loot_box {
             _box_minted: 0,
             _box_opened: 0,
         };
-
+        dof::add(&mut collection.id, COUNTER_KEY, table::new<address, u64>(ctx));
         transfer::share_object(collection);
     }
 
@@ -127,15 +139,22 @@ module nft_reveal::loot_box {
 
     // SETTER
     public entry fun buy_box(
-        collection: &mut BoxCollection, 
+        collection: &mut BoxCollection,
         paid: Coin<SUI>, 
         ctx: &mut TxContext
     ) {
+
         let n = collection._box_minted + 1;
         let sender = tx_context::sender(ctx);
-
+        let table = dof::borrow_mut(&mut collection.id, COUNTER_KEY);
         assert!(n < collection.box_max_supply, EMaxSupplyReaced);
         assert!(collection.box_price == coin::value(&paid), EAmountIncorrect);
+        let isUserExist = store::user_exists(table, sender);
+        // check to how many times user minted
+        if(isUserExist) {
+            assert!(store::get_minted_counter(table, sender) < MAX_MINTED_PER_ADDRESS, EMaxMintedPerAddress);
+        };
+        
         
         let box = LootBox {
             id: object::new(ctx),
@@ -148,7 +167,14 @@ module nft_reveal::loot_box {
             buyer: sender,
         });
 
+
         collection._box_minted = n;
+        if(isUserExist) {
+            store::update_minted_counter(table, sender);
+        } else {
+            store::add_new_data(table, ctx);
+        };
+
         transfer::transfer(box, sender);
         transfer::transfer(paid, collection.creator);
     }
@@ -209,6 +235,7 @@ module nft_reveal::loot_box {
         
         result_rarity
     }
+    
     // https://stackoverflow.com/questions/74513153/test-for-init-function-from-examples-doesnt-works
     #[test_only]
     public fun create_lootbox(ctx: &mut TxContext, max_supply: u64) {
@@ -226,7 +253,7 @@ module nft_reveal::loot_box {
             _box_minted: 0,
             _box_opened: 0,
         };
-
+        dof::add(&mut collection.id, COUNTER_KEY, table::new<address, u64>(ctx));
         transfer::share_object(collection);  
     }
 }
