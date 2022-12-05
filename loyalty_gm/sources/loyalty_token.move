@@ -10,7 +10,7 @@ module loyalty_gm::loyalty_token {
 
     // ======== Constants =========
 
-    const INITIAL_LVL: u8 = 0;
+    const INITIAL_LVL: u8 = 1;
     const INITIAL_XP: u64 = 0;
 
     // ======== Error codes =========
@@ -32,7 +32,7 @@ module loyalty_gm::loyalty_token {
         url: Url,
 
         // Level of nft [0-255]
-        level: u8,
+        lvl: u8,
         // Expiration timestamp (UNIX time) - app specific
         xp: u64,
         // TODO:
@@ -70,7 +70,8 @@ module loyalty_gm::loyalty_token {
             name: *loyalty_system::get_name(ls),
             description: *loyalty_system::get_description(ls),
             url: *loyalty_system::get_url(ls),
-            level: INITIAL_LVL,
+            lvl: INITIAL_LVL,
+            // lvl_threshold: INITIAL_LVL_THRESHOLD,
             xp: INITIAL_XP,
         };
         let sender = tx_context::sender(ctx);

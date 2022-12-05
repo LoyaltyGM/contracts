@@ -1,7 +1,7 @@
 module loyalty_gm::loyalty_system {
     friend loyalty_gm::loyalty_token;
 
-    use std::vector::length;
+    use std::vector::{Self, length};
     use std::string::{Self, String};
     use sui::object::{Self, UID, ID};
     use sui::transfer;
@@ -22,7 +22,7 @@ module loyalty_gm::loyalty_system {
     const USER_STORE_KEY: vector<u8> = b"user_store";
     const MAX_NAME_LENGTH: u64 = 32;
     const MAX_DESCRIPTION_LENGTH: u64 = 255;
-    const BASIC_MAX_LEVELS: u64 = 30;
+    const BASIC_MAX_LEVEL: u8 = 30;
 
     // ======== Error codes =========
 
@@ -60,9 +60,9 @@ module loyalty_gm::loyalty_system {
 
 
         // tasks & rewards
-        max_levels: u64,
+        max_level: u8,
         tasks: VecMap<ID, Task>,
-        rewards: VecMap<u64, Reward>,
+        rewards: VecMap<u8, Reward>,
 
         // --dynamic fields--
         // user_store: Table<address, User>,
@@ -109,7 +109,7 @@ module loyalty_gm::loyalty_system {
             total_minted: 0,
             max_supply,
             creator,
-            max_levels: BASIC_MAX_LEVELS,
+            max_level: BASIC_MAX_LEVEL,
             tasks: task_store::empty(),
             rewards: reward_store::empty(),
         };
@@ -152,14 +152,14 @@ module loyalty_gm::loyalty_system {
         loyalty_system.max_supply = new_max_supply;
     }
 
-    public entry fun add_reward(admin_cap: &AdminCap, level: u64, description: vector<u8>, loyalty_system: &mut LoyaltySystem, _: &mut TxContext) {
+    public entry fun add_reward(admin_cap: &AdminCap, level: u8, description: vector<u8>, loyalty_system: &mut LoyaltySystem, _: &mut TxContext) {
         check_admin(admin_cap, loyalty_system);
-        assert!(level <= loyalty_system.max_levels, EInvalidLevel);
+        assert!(level <= loyalty_system.max_level, EInvalidLevel);
 
         reward_store::add_reward(&mut loyalty_system.rewards, level, description);
     }
 
-    public entry fun remove_reward(admin_cap: &AdminCap, level: u64, loyalty_system: &mut LoyaltySystem, _: &mut TxContext) {
+    public entry fun remove_reward(admin_cap: &AdminCap, level: u8, loyalty_system: &mut LoyaltySystem, _: &mut TxContext) {
         check_admin(admin_cap, loyalty_system);
 
         reward_store::remove_reward(&mut loyalty_system.rewards, level);
