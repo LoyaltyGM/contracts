@@ -119,6 +119,15 @@ module nft_reveal::loot_box_tests {
         test_scenario::end(scenario_val);
     }
 
+    #[test]
+    #[expected_failure(abort_code = 2)]
+    fun error_per_max_minted_per_address() {
+        let scenario_val = test_scenario::begin(OWNER);
+        let scenario = &mut scenario_val;
+        create_collection(scenario, MAX_SUPPLY);
+        buy_multiple_times(scenario, COIN_TO_BUY_BOX, 4);
+        test_scenario::end(scenario_val);
+    }
     
 
 }
