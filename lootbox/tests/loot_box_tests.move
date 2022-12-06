@@ -1,8 +1,8 @@
 // // Copyright (c) LoyaltyGM.
 
 #[test_only]
-module nft_reveal::loot_box_tests {
-    use nft_reveal::loot_box;
+module lootbox::loot_box_tests {
+    use lootbox::loot_box;
     use sui::test_scenario::{Self, Scenario};
     use std::string;
     // use std::debug;

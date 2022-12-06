@@ -1,5 +1,5 @@
-module nft_reveal::store {
-    friend nft_reveal::loot_box;
+module lootbox::store {
+    friend lootbox::loot_box;
 
     use sui::table::{Self, Table};
     use sui::tx_context::{Self, TxContext};
