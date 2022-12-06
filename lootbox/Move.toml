@@ -1,5 +1,5 @@
 [package]
-name = "NftReveal"
+name = "LootBox"
 version = "0.0.1"
 
 [dependencies]
@@ -12,4 +12,4 @@ subdir = "sui"
 rev = "7cae189f568d2405b5f912eeabdcec9d19473a0a"
 
 [addresses]
-nft_reveal = "0x0"
+lootbox = "0x0"

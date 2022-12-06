@@ -1,4 +1,4 @@
-module nft_reveal::loot_box {
+module lootbox::loot_box {
     use movemate::pseudorandom::{Self};
 
     use std::string::{Self, String};
@@ -11,7 +11,7 @@ module nft_reveal::loot_box {
     use sui::url::{Self, Url};
     use sui::sui::SUI;
     use sui::coin::{Self, Coin};
-    use nft_reveal::store::{Self};
+    use lootbox::store::{Self};
     use sui::dynamic_object_field as dof;
     use sui::table::{Self};
 
