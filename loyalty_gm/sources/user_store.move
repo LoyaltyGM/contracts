@@ -20,7 +20,7 @@ module loyalty_gm::user_store {
 
     // ======== Structs =========
 
-    struct User has store {
+    struct User has store, drop {
         token_id: ID,
         owner: address,
         active_tasks: VecSet<ID>,

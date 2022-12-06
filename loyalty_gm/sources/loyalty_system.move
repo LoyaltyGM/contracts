@@ -8,9 +8,11 @@ module loyalty_gm::loyalty_system {
     use sui::url::{Self, Url};
     use sui::tx_context::{Self, TxContext};
     use sui::event::{emit};
-    use sui::vec_map::{VecMap};
+    use sui::vec_map::{Self, VecMap};
     use sui::table::{Table};
-    use sui::dynamic_object_field as ofield;
+    use sui::dynamic_object_field as dof;
+    use sui::coin::{Coin};
+    use sui::sui::SUI;
 
     use loyalty_gm::system_store::{Self, SystemStore, SYSTEM_STORE};
     use loyalty_gm::user_store::{Self, User};
@@ -113,11 +115,10 @@ module loyalty_gm::loyalty_system {
             max_supply,
             creator,
             max_lvl,
-            // lvl_threshold: create_threshold_vec(max_lvl),
             tasks: task_store::empty(),
             rewards: reward_store::empty(),
         };
-        ofield::add(&mut loyalty_system.id, USER_STORE_KEY, user_store::new(ctx));
+        dof::add(&mut loyalty_system.id, USER_STORE_KEY, user_store::new(ctx));
 
         emit(CreateLoyaltySystemEvent {
             object_id: object::uid_to_inner(&loyalty_system.id),
@@ -161,8 +162,10 @@ module loyalty_gm::loyalty_system {
         level: u64, 
         url: vector<u8>,
         description: vector<u8>, 
+        reward_pool: Coin<SUI>,
+        reward_supply: u64,
         loyalty_system: &mut LoyaltySystem,
-         _: &mut TxContext
+        ctx: &mut TxContext
     ) {
         check_admin(admin_cap, loyalty_system);
         assert!(level <= loyalty_system.max_lvl, EInvalidLevel);
@@ -171,14 +174,17 @@ module loyalty_gm::loyalty_system {
             &mut loyalty_system.rewards, 
             level, 
             url,
-            description
+            description,
+            reward_pool,
+            reward_supply,
+            ctx
         );
     }
 
-    public entry fun remove_reward(admin_cap: &AdminCap, level: u64, loyalty_system: &mut LoyaltySystem, _: &mut TxContext) {
+    public entry fun remove_reward(admin_cap: &AdminCap, level: u64, loyalty_system: &mut LoyaltySystem, ctx: &mut TxContext) {
         check_admin(admin_cap, loyalty_system);
 
-        reward_store::remove_reward(&mut loyalty_system.rewards, level);
+        reward_store::remove_reward(&mut loyalty_system.rewards, level, ctx);
     }
 
     public entry fun add_task(
@@ -242,15 +248,20 @@ module loyalty_gm::loyalty_system {
         user_store::start_task(get_mut_user_store(loyalty_system), task_id, tx_context::sender(ctx))
     }
 
+    // public entry fun claim_reward()
     // ======= Public functions =======
 
     public(friend) fun get_mut_user_store(loyalty_system: &mut LoyaltySystem): &mut Table<address, User>{
-        ofield::borrow_mut(&mut loyalty_system.id, USER_STORE_KEY)
+        dof::borrow_mut(&mut loyalty_system.id, USER_STORE_KEY)
     }
 
     public(friend) fun increment_total_minted(loyalty_system: &mut LoyaltySystem){
         assert!(get_total_minted(loyalty_system) <= get_max_supply(loyalty_system), EMaxSupplyReached);
         loyalty_system.total_minted = loyalty_system.total_minted + 1;
+    }
+
+    public(friend) fun get_mut_reward(loyalty_system: &mut LoyaltySystem, lvl: u64): &mut Reward{
+        vec_map::get_mut(&mut loyalty_system.rewards, &lvl)
     }
 
     public fun get_name(loyalty_system: &LoyaltySystem): &string::String {
@@ -274,7 +285,7 @@ module loyalty_gm::loyalty_system {
     }
 
     public fun get_user_store(loyalty_system: &LoyaltySystem): &Table<address, User> {
-        ofield::borrow(&loyalty_system.id, USER_STORE_KEY)
+        dof::borrow(&loyalty_system.id, USER_STORE_KEY)
     }
 
     public fun get_max_lvl(loyalty_system: &LoyaltySystem): u64 {

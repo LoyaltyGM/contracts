@@ -1,13 +1,16 @@
 module loyalty_gm::loyalty_token {
-    use sui::object::{Self, UID, ID};
     use std::string::{Self, String};
+
+    use sui::object::{Self, UID, ID};
     use sui::transfer;
     use sui::url::{Url};
     use sui::tx_context::{Self, TxContext};
     use sui::event::{emit};
     use sui::math::{Self};
+
     use loyalty_gm::loyalty_system::{Self, LoyaltySystem};
     use loyalty_gm::user_store::{Self};
+    use loyalty_gm::reward_store::{Self};
 
     // ======== Constants =========
 
@@ -22,6 +25,7 @@ module loyalty_gm::loyalty_token {
     const ENoClaimableXp: u64 = 2;
     const EAdminOnly: u64 = 3;
     const EInvalidTokenStore: u64 = 4;
+    const EInvalidLvl: u64 = 4;
 
     // ======== Structs =========
 
@@ -103,6 +107,16 @@ module loyalty_gm::loyalty_token {
         user_store::reset_user_xp(loyalty_system::get_mut_user_store(ls), sender);
 
         update_token_stats(claimable_xp, ls, token);
+    }
+
+    public entry fun claim_reward (
+        ls: &mut LoyaltySystem,
+        token: &mut LoyaltyToken, 
+        reward_lvl: u64,
+        ctx: &mut TxContext
+    ) {
+        assert!(token.lvl >= reward_lvl, EInvalidLvl);
+        reward_store::claim_reward(loyalty_system::get_mut_reward(ls, reward_lvl), ctx);
     }
 
     // ======== Admin Functions =========
