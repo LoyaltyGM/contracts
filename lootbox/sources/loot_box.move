@@ -20,8 +20,10 @@ module lootbox::loot_box {
     const HIGH_RANGE: u64 = 100;
     const BOX_URL: vector<u8> = b"ipfs://QmZVAXP7B7ZukhCDR5uSivmagkY53QtGZnvPRgZtEjfZrv";
     const LOOT_URL: vector<u8> =  b"ipfs://QmVGYBzXTVzZFhJjtsd8bwBNJZ5drWwFF9XwsQJHFdbTkL";
+    
+    // Max minted per address
     const MAX_MINTED_PER_ADDRESS: u64 = 3;
-
+    // For dynamic field table
     const COUNTER_KEY: vector<u8> = b"_box_counter_per_acount";
 
     // ======== Errors =========
@@ -47,7 +49,7 @@ module lootbox::loot_box {
     
     // ======== Structs =========
     /// NFT collection which registered here. 
-    /// dynamic field vecmap<address, u64>
+    /// dynamic field vec_map<address, u64>
     struct BoxCollection has key {
         id: UID,
         creator: address,
@@ -97,7 +99,6 @@ module lootbox::loot_box {
 
     fun init(ctx: &mut TxContext) {
         let rarity_types = rarity_type();
-
         let rarity_weights = rarity_weight();
         
         let collection = BoxCollection {
@@ -111,6 +112,7 @@ module lootbox::loot_box {
             _box_minted: 0,
             _box_opened: 0,
         };
+        // create dynamic field table with empty table
         dof::add(&mut collection.id, COUNTER_KEY, table::new<address, u64>(ctx));
         transfer::share_object(collection);
     }
@@ -131,11 +133,14 @@ module lootbox::loot_box {
         collection._box_opened
     }
 
-    // LootBox
-    public fun get_box_name(box: &Loot): String {
+    // Loot
+    public fun get_loot_name(box: &Loot): String {
         box.name
     }
 
+    public fun get_lootbox_rarity(box: &Loot): String {
+        box.rarity
+    }
 
     // SETTER
     public entry fun buy_box(
@@ -146,6 +151,7 @@ module lootbox::loot_box {
 
         let n = collection._box_minted + 1;
         let sender = tx_context::sender(ctx);
+        
         let table = dof::borrow_mut(&mut collection.id, COUNTER_KEY);
         assert!(n < collection.box_max_supply, EMaxSupplyReaced);
         assert!(collection.box_price == coin::value(&paid), EAmountIncorrect);
@@ -169,6 +175,7 @@ module lootbox::loot_box {
 
 
         collection._box_minted = n;
+        // update minted counter
         if(isUserExist) {
             store::update_minted_counter(table, sender);
         } else {

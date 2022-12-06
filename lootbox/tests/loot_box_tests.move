@@ -82,7 +82,7 @@ module lootbox::loot_box_tests {
         test_scenario::next_tx(scenario, MINTER_1);
         {
             let box_val = test_scenario::take_from_sender<loot_box::Loot>(scenario);
-            assert!(loot_box::get_box_name(&box_val) == string::utf8(b"LOOT"), 1);
+            assert!(loot_box::get_loot_name(&box_val) == string::utf8(b"LOOT"), 1);
             test_scenario::return_to_sender(scenario, box_val);
         }
     }
