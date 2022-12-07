@@ -185,7 +185,7 @@ module loyalty_gm::loyalty_system {
         );
     }
 
-    public entry fun remove_reward(admin_cap: &AdminCap, level: u64, loyalty_system: &mut LoyaltySystem, ctx: &mut TxContext) {
+    public entry fun remove_reward(admin_cap: &AdminCap, loyalty_system: &mut LoyaltySystem, level: u64, ctx: &mut TxContext) {
         check_admin(admin_cap, loyalty_system);
 
         reward_store::remove_reward(&mut loyalty_system.rewards, level, ctx);
