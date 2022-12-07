@@ -83,9 +83,9 @@ module lootbox::loot_box {
 
     fun rarity_type(): vector<String> {
        let rarity_types = vector::empty<String>();
-        vector::push_back(&mut rarity_types, string::utf8(b"Common"));
-        vector::push_back(&mut rarity_types, string::utf8(b"Rare"));
-        vector::push_back(&mut rarity_types, string::utf8(b"Epic"));
+        vector::push_back(&mut rarity_types, string::utf8(b"Bronze"));
+        vector::push_back(&mut rarity_types, string::utf8(b"Silver"));
+        vector::push_back(&mut rarity_types, string::utf8(b"Gold"));
         rarity_types 
     }
 
@@ -141,7 +141,7 @@ module lootbox::loot_box {
     public fun get_lootbox_rarity(box: &Loot): String {
         box.rarity
     }
-
+    // sui client call --function buy_box --module loot_box --package 0xf23231864bfbd32c76cfc3f55b80df05558cf6a7 --args 0x4a46f378e4df8e1774840d7ea2071652820f618f 10000000 --gas-budget 1000
     // SETTER
     public entry fun buy_box(
         collection: &mut BoxCollection,
