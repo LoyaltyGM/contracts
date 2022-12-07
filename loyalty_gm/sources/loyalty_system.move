@@ -135,6 +135,8 @@ module loyalty_gm::loyalty_system {
         transfer::share_object(loyalty_system);
     }
 
+    // ======== Admin Functions: Update
+
     public entry fun update_name(admin_cap: &AdminCap, loyalty_system: &mut LoyaltySystem, new_name: vector<u8> ){
         assert!(length(&new_name) <= MAX_NAME_LENGTH, ETextOverflow);
         check_admin(admin_cap, loyalty_system);
@@ -156,6 +158,8 @@ module loyalty_gm::loyalty_system {
         check_admin(admin_cap, loyalty_system);
         loyalty_system.max_supply = new_max_supply;
     }
+
+    // ======== Admin Functions: Rewards
 
     public entry fun add_reward(
         admin_cap: &AdminCap, 
@@ -186,6 +190,8 @@ module loyalty_gm::loyalty_system {
 
         reward_store::remove_reward(&mut loyalty_system.rewards, level, ctx);
     }
+
+    // ======== Admin Functions: Tasks
 
     public entry fun add_task(
         admin_cap: &AdminCap, 
@@ -225,6 +231,8 @@ module loyalty_gm::loyalty_system {
         task_store::remove_task(&mut loyalty_system.tasks, task_id);
     }
 
+    // ======= Verifier functions =======
+
     public entry fun finish_task(
         _: &VerifierCap,
         loyalty_system: &mut LoyaltySystem, 
@@ -241,7 +249,6 @@ module loyalty_gm::loyalty_system {
         )
     }
 
-
     // ======= User functions =======
 
     public entry fun start_task(loyalty_system: &mut LoyaltySystem, task_id: ID, ctx: &mut TxContext) {
@@ -249,6 +256,8 @@ module loyalty_gm::loyalty_system {
     }
 
     // ======= Public functions =======
+
+    // ======= Public functions: Friends
 
     public(friend) fun get_mut_user_store(loyalty_system: &mut LoyaltySystem): &mut Table<address, User>{
         dof::borrow_mut(&mut loyalty_system.id, USER_STORE_KEY)
@@ -262,6 +271,8 @@ module loyalty_gm::loyalty_system {
     public(friend) fun get_mut_reward(loyalty_system: &mut LoyaltySystem, lvl: u64): &mut Reward{
         vec_map::get_mut(&mut loyalty_system.rewards, &lvl)
     }
+
+    // ======= Public functions: View
 
     public fun get_name(loyalty_system: &LoyaltySystem): &string::String {
         &loyalty_system.name
@@ -317,6 +328,7 @@ module loyalty_gm::loyalty_system {
         }, tx_context::sender(ctx))
     }
 
+    #[test_only]
     public fun get_claimable_xp_test(ls: &LoyaltySystem, user: address): u64 {
         user_store::get_user_xp(get_user_store(ls), user)
     }

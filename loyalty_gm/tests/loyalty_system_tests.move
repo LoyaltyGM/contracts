@@ -53,6 +53,8 @@ module loyalty_gm::loyalty_gm_tests {
     // ======== Errors =========
 
     const Error: u64 = 1;
+
+    // ======== Tests =========
     
     #[test]
     fun create_loyalty_system_test(): Scenario {
@@ -133,36 +135,7 @@ module loyalty_gm::loyalty_gm_tests {
         test_scenario::end(scenario_val);
     }
 
-    #[test]
-    fun mint_test(): Scenario {
-        let scenario_val = create_loyalty_system_test();
-        let scenario = &mut scenario_val;
-
-        mint_token(scenario, USER_1);
-
-        test_scenario::next_tx(scenario, USER_1);
-        {
-            let token = test_scenario::take_from_sender<LoyaltyToken>(scenario);
-
-            print(&token);
-
-            test_scenario::return_to_sender(scenario, token);
-        };
-
-        scenario_val
-    }
-
-    #[test]
-    #[expected_failure(abort_code = 0)]
-    fun mint_test_fail() {
-        let scenario_val = create_loyalty_system_test();
-        let scenario = &mut scenario_val;
-
-        mint_token(scenario, USER_1);
-        mint_token(scenario, USER_1);
-
-        test_scenario::end(scenario_val);
-    }
+    // ======== Tests: Tasks
 
     #[test]
     fun add_task_test(): (Scenario, object::ID) {
@@ -213,6 +186,58 @@ module loyalty_gm::loyalty_gm_tests {
     }
 
     #[test]
+    fun remove_task_test() {
+        let (scenario_val, task_id) = add_task_test();
+        let scenario = &mut scenario_val;
+
+        remove_task(scenario, task_id);
+
+        test_scenario::next_tx(scenario, ADMIN);
+        {
+            let ls = test_scenario::take_shared<LoyaltySystem>(scenario);
+
+            assert!(vec_map::size(loyalty_system::get_tasks(&ls)) == 0, Error);
+
+            test_scenario::return_shared(ls);
+        };
+
+        test_scenario::end(scenario_val);
+    }
+
+    // ======== Tests: Token
+
+    #[test]
+    fun mint_test(): Scenario {
+        let scenario_val = create_loyalty_system_test();
+        let scenario = &mut scenario_val;
+
+        mint_token(scenario, USER_1);
+
+        test_scenario::next_tx(scenario, USER_1);
+        {
+            let token = test_scenario::take_from_sender<LoyaltyToken>(scenario);
+
+            print(&token);
+
+            test_scenario::return_to_sender(scenario, token);
+        };
+
+        scenario_val
+    }
+
+    #[test]
+    #[expected_failure(abort_code = 0)]
+    fun mint_test_fail() {
+        let scenario_val = create_loyalty_system_test();
+        let scenario = &mut scenario_val;
+
+        mint_token(scenario, USER_1);
+        mint_token(scenario, USER_1);
+
+        test_scenario::end(scenario_val);
+    }
+
+    #[test]
     fun claim_xp_test() {
         let scenario_val = finish_task_test();
         let scenario = &mut scenario_val;
@@ -233,7 +258,9 @@ module loyalty_gm::loyalty_gm_tests {
         test_scenario::end(scenario_val);
     }
 
-    // ======== Admin functions =========
+    // ======== Utility functions =========
+
+    // ======== Utility functions: Admin
 
     fun create_system_store(scenario: &mut Scenario) {
         test_scenario::next_tx(scenario, ADMIN);
@@ -285,7 +312,25 @@ module loyalty_gm::loyalty_gm_tests {
         };
     }
 
-    // ======== Verifier functions =========
+    fun remove_task(scenario: &mut Scenario, task_id: object::ID) {
+        test_scenario::next_tx(scenario, ADMIN);
+        {
+            let ls = test_scenario::take_shared<LoyaltySystem>(scenario);
+            let admin_cap = test_scenario::take_from_sender<AdminCap>(scenario);
+
+            loyalty_system::remove_task(
+                &admin_cap,
+                &mut ls,
+                task_id,
+                test_scenario::ctx(scenario)
+            );
+
+            test_scenario::return_shared(ls);
+            test_scenario::return_to_sender(scenario, admin_cap);
+        };
+    }
+
+    // ======== Utility functions: Verifier
 
     fun get_verifier(scenario: &mut Scenario) {
         test_scenario::next_tx(scenario, VERIFIER);
@@ -316,7 +361,7 @@ module loyalty_gm::loyalty_gm_tests {
         };
     }
 
-    // ======== User functions =========
+    // ======== Utility functions: User
 
     fun mint_token(scenario: &mut Scenario, user: address) {
         test_scenario::next_tx(scenario, user);
