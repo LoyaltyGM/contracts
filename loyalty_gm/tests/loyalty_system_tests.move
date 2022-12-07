@@ -55,7 +55,7 @@ module loyalty_gm::loyalty_gm_tests {
     const Error: u64 = 1;
     
     #[test]
-    fun create_loyalty_system_test() {
+    fun create_loyalty_system_test(): Scenario {
         let scenario_val = test_scenario::begin(ADMIN);
         let scenario = &mut scenario_val;
 
@@ -80,17 +80,14 @@ module loyalty_gm::loyalty_gm_tests {
             test_scenario::return_shared(store);
         };
 
-        test_scenario::end(scenario_val);
+        scenario_val
     }
 
     #[test]
     fun update_loyalty_system_test() {
         let new_name = b"new name";
-        let scenario_val = test_scenario::begin(ADMIN);
+        let scenario_val = create_loyalty_system_test();
         let scenario = &mut scenario_val;
-
-        create_system_store(scenario);
-        create_loyalty_system(scenario, ADMIN);
 
         test_scenario::next_tx(scenario, ADMIN);
         { 
@@ -114,14 +111,12 @@ module loyalty_gm::loyalty_gm_tests {
     #[test]
     #[expected_failure(abort_code = 0)]
     fun check_admin_cap_test() {
-        let scenario_val = test_scenario::begin(ADMIN);
+        let scenario_val = create_loyalty_system_test();
         let scenario = &mut scenario_val;
 
-        create_system_store(scenario);
         create_loyalty_system(scenario, USER_1);
-        create_loyalty_system(scenario, ADMIN);
 
-        test_scenario::next_tx(scenario, USER_1);
+        test_scenario::next_tx(scenario, ADMIN);
         { 
             let ls = test_scenario::take_shared<LoyaltySystem>(scenario);
             let admin_cap = test_scenario::take_from_sender<AdminCap>(scenario);
@@ -140,12 +135,10 @@ module loyalty_gm::loyalty_gm_tests {
 
     #[test]
     fun add_task_test(): (Scenario, object::ID) {
-        let scenario_val = test_scenario::begin(ADMIN);
+        let scenario_val = create_loyalty_system_test();
         let scenario = &mut scenario_val;
         let task_id: object::ID;
 
-        create_system_store(scenario);
-        create_loyalty_system(scenario, ADMIN);
         add_task(scenario);
 
         test_scenario::next_tx(scenario, ADMIN);
