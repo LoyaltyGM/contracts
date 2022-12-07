@@ -40,4 +40,14 @@ module loyalty_gm::system_store {
     public fun borrow(store: &SystemStore<SYSTEM_STORE>, i: u64): ID {
         *vector::borrow(&store.systems, i)
     }
+
+    #[test_only]
+    public fun init_test(ctx: &mut TxContext) {
+        let store = SystemStore<SYSTEM_STORE> {
+            id: object::new(ctx),
+            systems: vector::empty<ID>()
+        };
+
+        transfer::share_object(store)
+    }
 }

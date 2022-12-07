@@ -135,36 +135,36 @@ module loyalty_gm::loyalty_system {
         transfer::share_object(loyalty_system);
     }
 
-    public entry fun update_loyalty_system_name(admin_cap: &AdminCap, loyalty_system: &mut LoyaltySystem, new_name: vector<u8> ){
+    public entry fun update_name(admin_cap: &AdminCap, loyalty_system: &mut LoyaltySystem, new_name: vector<u8> ){
         assert!(length(&new_name) <= MAX_NAME_LENGTH, ETextOverflow);
         check_admin(admin_cap, loyalty_system);
         loyalty_system.name = string::utf8(new_name);
     }
 
-    public entry fun update_loyalty_system_description(admin_cap: &AdminCap, loyalty_system: &mut LoyaltySystem, new_description: vector<u8> ){
+    public entry fun update_description(admin_cap: &AdminCap, loyalty_system: &mut LoyaltySystem, new_description: vector<u8> ){
         assert!(length(&new_description) <= MAX_DESCRIPTION_LENGTH, ETextOverflow);
         check_admin(admin_cap, loyalty_system);
         loyalty_system.description = string::utf8(new_description);
     }
 
-    public entry fun update_loyalty_system_url(admin_cap: &AdminCap, loyalty_system: &mut LoyaltySystem, new_url: vector<u8> ){
+    public entry fun update_url(admin_cap: &AdminCap, loyalty_system: &mut LoyaltySystem, new_url: vector<u8> ){
         check_admin(admin_cap, loyalty_system);
         loyalty_system.url = url::new_unsafe_from_bytes(new_url);
     }
 
-    public entry fun update_loyalty_system_max_supply(admin_cap: &AdminCap, loyalty_system: &mut LoyaltySystem, new_max_supply: u64 ){
+    public entry fun update_max_supply(admin_cap: &AdminCap, loyalty_system: &mut LoyaltySystem, new_max_supply: u64 ){
         check_admin(admin_cap, loyalty_system);
         loyalty_system.max_supply = new_max_supply;
     }
 
     public entry fun add_reward(
         admin_cap: &AdminCap, 
+        loyalty_system: &mut LoyaltySystem,
         level: u64, 
         url: vector<u8>,
         description: vector<u8>, 
         reward_pool: Coin<SUI>,
         reward_supply: u64,
-        loyalty_system: &mut LoyaltySystem,
         ctx: &mut TxContext
     ) {
         check_admin(admin_cap, loyalty_system);
@@ -248,7 +248,6 @@ module loyalty_gm::loyalty_system {
         user_store::start_task(get_mut_user_store(loyalty_system), task_id, tx_context::sender(ctx))
     }
 
-    // public entry fun claim_reward()
     // ======= Public functions =======
 
     public(friend) fun get_mut_user_store(loyalty_system: &mut LoyaltySystem): &mut Table<address, User>{
@@ -292,9 +291,33 @@ module loyalty_gm::loyalty_system {
         loyalty_system.max_lvl
     }
 
-    // ======= Private functions =======
+    public fun get_tasks(loyalty_system: &LoyaltySystem): &VecMap<ID, Task> {
+        &loyalty_system.tasks
+    }
+
+    public fun get_rewards(loyalty_system: &LoyaltySystem): &VecMap<u64, Reward> {
+        &loyalty_system.rewards
+    }
+
+    // ======= Private/Utility functions =======
 
     fun check_admin(admin_cap: &AdminCap, system: &LoyaltySystem) {
         assert!(object::borrow_id(system) == &admin_cap.loyalty_system, EAdminOnly);
+    }
+
+    #[test_only]
+    public fun check_admin_test(admin_cap: &AdminCap, system: &LoyaltySystem) {
+        check_admin(admin_cap, system)
+    }
+
+    #[test_only]
+    public fun get_verifier(ctx: &mut TxContext) {
+        transfer::transfer(VerifierCap {
+            id: object::new(ctx)
+        }, tx_context::sender(ctx))
+    }
+
+    public fun get_claimable_xp_test(ls: &LoyaltySystem, user: address): u64 {
+        user_store::get_user_xp(get_user_store(ls), user)
     }
 }
