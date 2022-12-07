@@ -33,7 +33,7 @@ module loyalty_gm::loyalty_gm_tests {
 
     use loyalty_gm::loyalty_system::{Self, LoyaltySystem, AdminCap, VerifierCap};
     use loyalty_gm::system_store::{Self, SystemStore, SYSTEM_STORE};
-    use loyalty_gm::loyalty_token::{Self};
+    use loyalty_gm::loyalty_token::{Self, LoyaltyToken};
 
     // ======== Constants =========
 
@@ -134,6 +134,37 @@ module loyalty_gm::loyalty_gm_tests {
     }
 
     #[test]
+    fun mint_test(): Scenario {
+        let scenario_val = create_loyalty_system_test();
+        let scenario = &mut scenario_val;
+
+        mint_token(scenario, USER_1);
+
+        test_scenario::next_tx(scenario, USER_1);
+        {
+            let token = test_scenario::take_from_sender<LoyaltyToken>(scenario);
+
+            print(&token);
+
+            test_scenario::return_to_sender(scenario, token);
+        };
+
+        scenario_val
+    }
+
+    #[test]
+    #[expected_failure(abort_code = 0)]
+    fun mint_test_fail() {
+        let scenario_val = create_loyalty_system_test();
+        let scenario = &mut scenario_val;
+
+        mint_token(scenario, USER_1);
+        mint_token(scenario, USER_1);
+
+        test_scenario::end(scenario_val);
+    }
+
+    #[test]
     fun add_task_test(): (Scenario, object::ID) {
         let scenario_val = create_loyalty_system_test();
         let scenario = &mut scenario_val;
@@ -158,7 +189,7 @@ module loyalty_gm::loyalty_gm_tests {
     }
 
     #[test]
-    fun finish_task_test() {
+    fun finish_task_test(): Scenario {
         let (scenario_val, task_id) = add_task_test();
         let scenario = &mut scenario_val;
 
@@ -178,6 +209,27 @@ module loyalty_gm::loyalty_gm_tests {
             test_scenario::return_shared(ls);
         };
 
+        scenario_val
+    }
+
+    #[test]
+    fun claim_xp_test() {
+        let scenario_val = finish_task_test();
+        let scenario = &mut scenario_val;
+
+        test_scenario::next_tx(scenario, USER_1);
+        {
+            let ls = test_scenario::take_shared<LoyaltySystem>(scenario);
+            let token = test_scenario::take_from_sender<LoyaltyToken>(scenario);
+
+            loyalty_token::claim_xp(&mut ls, &mut token, test_scenario::ctx(scenario));
+
+            assert!(loyalty_token::get_xp(&token) == TASK_REWARD, Error);
+
+            test_scenario::return_to_sender(scenario, token);
+            test_scenario::return_shared(ls);
+        };
+        
         test_scenario::end(scenario_val);
     }
 

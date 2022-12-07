@@ -30,7 +30,7 @@ module loyalty_gm::loyalty_token {
     // ======== Structs =========
 
     /// Loyalty NFT.
-    struct LoyaltyToken has key, store {
+    struct LoyaltyToken has key {
         id: UID,
         loyalty_system: ID,
         name: String,
@@ -89,7 +89,7 @@ module loyalty_gm::loyalty_token {
         transfer::transfer(nft, sender);
     }
 
-    public entry fun claim_exp (
+    public entry fun claim_xp (
         ls: &mut LoyaltySystem,
         token: &mut LoyaltyToken, 
         ctx: &mut TxContext
@@ -148,5 +148,10 @@ module loyalty_gm::loyalty_token {
 
     fun get_xp_to_next_lvl(lvl: u64, xp: u64): u64 {
         get_xp_by_lvl(lvl + 1) - xp
+    }
+
+    #[test_only]
+    public fun get_xp(token: &LoyaltyToken): u64 {
+        token.xp
     }
 }
