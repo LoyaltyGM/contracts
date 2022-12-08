@@ -29,7 +29,7 @@ module loyalty_gm::task_tests {
     // ======== Tests: Tasks
 
     #[test]
-    fun add_task_test(): (Scenario, object::ID) {
+    public fun add_task_test(): (Scenario, object::ID) {
         let scenario_val = create_loyalty_system_test();
         let scenario = &mut scenario_val;
         let task_id: object::ID;

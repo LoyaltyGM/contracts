@@ -10,7 +10,7 @@ module loyalty_gm::test_utils {
 
     use loyalty_gm::loyalty_system::{Self, LoyaltySystem, AdminCap, VerifierCap};
     use loyalty_gm::system_store::{Self, SystemStore, SYSTEM_STORE};
-    use loyalty_gm::loyalty_token::{Self};
+    use loyalty_gm::loyalty_token::{Self, LoyaltyToken};
 
     // ======== Constants =========
 
@@ -191,6 +191,52 @@ module loyalty_gm::test_utils {
         };
     }
 
+    public fun add_fail_reward(scenario: &mut Scenario) {
+        test_scenario::next_tx(scenario, ADMIN);
+        {
+            let ls = test_scenario::take_shared<LoyaltySystem>(scenario);
+            let admin_cap = test_scenario::take_from_sender<AdminCap>(scenario);
+            let coin = test_scenario::take_from_sender<Coin<SUI>>(scenario);
+            
+            loyalty_system::add_reward(
+                &admin_cap,
+                &mut ls,
+                REWARD_LVL, 
+                b"url reward", 
+                b"reward description", 
+                coin, 
+                99,
+                test_scenario::ctx(scenario)
+            );
+
+            test_scenario::return_shared(ls);
+            test_scenario::return_to_sender(scenario, admin_cap);
+        };
+    }
+
+    public fun add_single_reward(scenario: &mut Scenario) {
+        test_scenario::next_tx(scenario, ADMIN);
+        {
+            let ls = test_scenario::take_shared<LoyaltySystem>(scenario);
+            let admin_cap = test_scenario::take_from_sender<AdminCap>(scenario);
+            let coin = test_scenario::take_from_sender<Coin<SUI>>(scenario);
+            
+            loyalty_system::add_reward(
+                &admin_cap,
+                &mut ls,
+                REWARD_LVL, 
+                b"url reward", 
+                b"reward description", 
+                coin, 
+                1,
+                test_scenario::ctx(scenario)
+            );
+
+            test_scenario::return_shared(ls);
+            test_scenario::return_to_sender(scenario, admin_cap);
+        };
+    }
+
     public fun remove_reward(scenario: &mut Scenario) {
         test_scenario::next_tx(scenario, ADMIN);
         {
@@ -206,6 +252,24 @@ module loyalty_gm::test_utils {
 
             test_scenario::return_shared(ls);
             test_scenario::return_to_sender(scenario, admin_cap);
+        };
+    }
+
+    public fun claim_reward(scenario: &mut Scenario, user: address, reward_lvl: u64) {
+        test_scenario::next_tx(scenario, user);
+        {
+            let ls = test_scenario::take_shared<LoyaltySystem>(scenario);
+            let token = test_scenario::take_from_sender<LoyaltyToken>(scenario);
+
+            loyalty_token::claim_reward(
+                &mut ls,
+                &token,
+                reward_lvl,
+                test_scenario::ctx(scenario)
+            );
+
+            test_scenario::return_shared(ls);
+            test_scenario::return_to_sender(scenario, token);
         };
     }
 
@@ -252,6 +316,19 @@ module loyalty_gm::test_utils {
                 test_scenario::ctx(scenario)
             );
 
+            test_scenario::return_shared(ls);
+        };
+    }
+
+    public fun claim_xp(scenario: &mut Scenario, user: address) {
+        test_scenario::next_tx(scenario, user);
+        {
+            let ls = test_scenario::take_shared<LoyaltySystem>(scenario);
+            let token = test_scenario::take_from_sender<LoyaltyToken>(scenario);
+
+            loyalty_token::claim_xp(&mut ls, &mut token, test_scenario::ctx(scenario));
+
+            test_scenario::return_to_sender(scenario, token);
             test_scenario::return_shared(ls);
         };
     }

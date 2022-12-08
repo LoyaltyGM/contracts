@@ -17,6 +17,7 @@ module loyalty_gm::token_tests {
     use loyalty_gm::test_utils::{
         get_USER_1,
         get_TASK_REWARD,
+        claim_xp    
     };
 
     // ======== Errors =========
@@ -65,24 +66,22 @@ module loyalty_gm::token_tests {
     }
 
     #[test]
-    fun claim_xp_test() {
+    public fun claim_xp_test(): Scenario {
         let scenario_val = finish_task_test();
         let scenario = &mut scenario_val;
 
+        claim_xp(scenario, get_USER_1());
+
         test_scenario::next_tx(scenario, get_USER_1());
         {
-            let ls = test_scenario::take_shared<LoyaltySystem>(scenario);
             let token = test_scenario::take_from_sender<LoyaltyToken>(scenario);
-
-            loyalty_token::claim_xp(&mut ls, &mut token, test_scenario::ctx(scenario));
-
             assert!(loyalty_token::get_xp(&token) == get_TASK_REWARD(), Error);
-
             test_scenario::return_to_sender(scenario, token);
-            test_scenario::return_shared(ls);
         };
+
         
-        test_scenario::end(scenario_val);
+        
+        scenario_val
     }
 
     #[test]

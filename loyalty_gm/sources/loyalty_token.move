@@ -111,7 +111,7 @@ module loyalty_gm::loyalty_token {
 
     public entry fun claim_reward (
         ls: &mut LoyaltySystem,
-        token: &mut LoyaltyToken, 
+        token: &LoyaltyToken, 
         reward_lvl: u64,
         ctx: &mut TxContext
     ) {
@@ -153,5 +153,10 @@ module loyalty_gm::loyalty_token {
     #[test_only]
     public fun get_xp(token: &LoyaltyToken): u64 {
         token.xp
+    }
+
+    #[test_only]
+    public fun get_lvl(token: &LoyaltyToken): u64 {
+        token.lvl
     }
 }
