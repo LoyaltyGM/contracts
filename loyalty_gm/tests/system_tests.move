@@ -71,6 +71,8 @@ module loyalty_gm::system_tests {
             let store = test_scenario::take_shared<SystemStore<SYSTEM_STORE>>(scenario);
             
             assert!(system_store::contains(&store, object::id(&ls)), Error);
+            assert!(system_store::borrow(&store, 0) == object::id(&ls), Error);
+            assert!(system_store::length(&store) == 1, Error);
             
             test_scenario::return_shared(ls);
             test_scenario::return_shared(store);

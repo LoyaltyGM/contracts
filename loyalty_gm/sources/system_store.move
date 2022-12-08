@@ -43,11 +43,6 @@ module loyalty_gm::system_store {
 
     #[test_only]
     public fun init_test(ctx: &mut TxContext) {
-        let store = SystemStore<SYSTEM_STORE> {
-            id: object::new(ctx),
-            systems: vector::empty<ID>()
-        };
-
-        transfer::share_object(store)
+        init(SYSTEM_STORE {}, ctx)
     }
 }

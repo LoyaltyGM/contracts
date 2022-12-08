@@ -128,6 +128,10 @@ module loyalty_gm::test_utils {
             let ls = test_scenario::take_shared<LoyaltySystem>(scenario);
             let admin_cap = test_scenario::take_from_sender<AdminCap>(scenario);
 
+            let args = vector::empty();
+            vector::push_back(&mut args, b"arg1");
+            vector::push_back(&mut args, b"arg2");
+
             loyalty_system::add_task(
                 &admin_cap,
                 &mut ls,
@@ -137,7 +141,7 @@ module loyalty_gm::test_utils {
                 object::id(&admin_cap),
                 b"module",
                 b"function_name",
-                vector::empty(),
+                args,
                 test_scenario::ctx(scenario)
             );
 
