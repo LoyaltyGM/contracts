@@ -149,4 +149,22 @@ module loyalty_gm::reward_tests {
 
         test_scenario::end(scenario_val);
     }
+
+    #[test]
+    #[expected_failure(abort_code = 1)]
+    fun fail_claim_reward_test() {
+        let (scenario_val, task_id) = add_task_test();
+        let scenario = &mut scenario_val;
+        get_verifier(scenario);
+
+
+        mint_token(scenario, get_USER_1());
+        start_task(scenario, get_USER_1(), task_id);
+        finish_task(scenario, get_USER_1(), task_id);
+
+        add_single_reward(scenario);
+        claim_reward(scenario, get_USER_1(), get_REWARD_LVL());
+
+        test_scenario::end(scenario_val);
+    }
 }

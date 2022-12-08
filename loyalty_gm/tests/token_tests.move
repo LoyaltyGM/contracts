@@ -85,7 +85,7 @@ module loyalty_gm::token_tests {
     }
 
     #[test]
-    #[expected_failure(abort_code = 2)]
+    #[expected_failure(abort_code = 0)]
     fun fail_claim_xp_test() {
         let scenario_val = mint_test();
         let scenario = &mut scenario_val;

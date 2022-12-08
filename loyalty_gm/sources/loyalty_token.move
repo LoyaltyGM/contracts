@@ -20,12 +20,8 @@ module loyalty_gm::loyalty_token {
 
     // ======== Error codes =========
 
-    const ENotUniqueAddress: u64 = 0;
-    const ETooManyMint: u64 = 1;
-    const ENoClaimableXp: u64 = 2;
-    const EAdminOnly: u64 = 3;
-    const EInvalidTokenStore: u64 = 4;
-    const EInvalidLvl: u64 = 4;
+    const ENoClaimableXp: u64 = 0;
+    const EInvalidLvl: u64 = 1;
 
     // ======== Structs =========
 
