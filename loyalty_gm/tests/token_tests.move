@@ -4,8 +4,9 @@ module loyalty_gm::token_tests {
 
     use sui::test_scenario::{Self, Scenario};
 
-    use loyalty_gm::loyalty_system::{LoyaltySystem};
+    use loyalty_gm::loyalty_system::{Self, LoyaltySystem};
     use loyalty_gm::loyalty_token::{Self, LoyaltyToken};
+    use loyalty_gm::user_store::{Self};
     use loyalty_gm::test_utils::{mint_token};
     use loyalty_gm::system_tests::{
         create_loyalty_system_test, 
@@ -33,11 +34,19 @@ module loyalty_gm::token_tests {
 
         test_scenario::next_tx(scenario, get_USER_1());
         {
+            let ls = test_scenario::take_shared<LoyaltySystem>(scenario);
             let token = test_scenario::take_from_sender<LoyaltyToken>(scenario);
+            let user_store = loyalty_system::get_user_store(&ls);
+            let user_info = user_store::get_user(user_store, get_USER_1());
+
+            assert!(user_store::user_exists(user_store, get_USER_1()), Error);
+            assert!(user_store::size(user_store) == 1, Error);
 
             print(&token);
+            print(user_info);
 
             test_scenario::return_to_sender(scenario, token);
+            test_scenario::return_shared(ls);
         };
 
         scenario_val

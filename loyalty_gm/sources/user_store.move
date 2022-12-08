@@ -81,8 +81,8 @@ module loyalty_gm::user_store {
     ) {
         let user_data = table::borrow_mut<address, User>(store, owner);
 
-        assert!(vec_set::contains(&user_data.active_tasks, &task_id), ETaskNotStarted);
         assert!(!vec_set::contains(&user_data.done_tasks, &task_id), ETaskAlreadyDone);
+        assert!(vec_set::contains(&user_data.active_tasks, &task_id), ETaskNotStarted);
 
         vec_set::remove(&mut user_data.active_tasks, &task_id);
         vec_set::insert(&mut user_data.done_tasks, task_id);
@@ -90,7 +90,7 @@ module loyalty_gm::user_store {
         update_user_xp(store, owner, reward_xp)
     }
 
-    public fun size(store: &Table<ID, User>): u64 {
+    public fun size(store: &Table<address, User>): u64 {
         table::length(store)
     }
 

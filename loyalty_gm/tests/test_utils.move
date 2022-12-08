@@ -218,7 +218,7 @@ module loyalty_gm::test_utils {
         };
     }
 
-    public fun finish_task(scenario: &mut Scenario, task_id: object::ID) {
+    public fun finish_task(scenario: &mut Scenario, user: address, task_id: object::ID) {
         test_scenario::next_tx(scenario, VERIFIER);
         {
             let ls = test_scenario::take_shared<LoyaltySystem>(scenario);
@@ -228,7 +228,7 @@ module loyalty_gm::test_utils {
                 &verify_cap,
                 &mut ls,
                 task_id,
-                USER_1
+                user
             );
 
             test_scenario::return_shared(ls);

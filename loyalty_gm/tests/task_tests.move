@@ -62,7 +62,7 @@ module loyalty_gm::task_tests {
         mint_token(scenario, get_USER_1());
         start_task(scenario, get_USER_1(), task_id);
 
-        finish_task(scenario, task_id);
+        finish_task(scenario, get_USER_1(), task_id);
 
         test_scenario::next_tx(scenario, get_ADMIN());
         {
@@ -74,6 +74,55 @@ module loyalty_gm::task_tests {
         };
 
         scenario_val
+    }
+
+    #[test]
+    #[expected_failure(abort_code = 0)]
+    public fun fail_start_task_twice_test() {
+        let (scenario_val, task_id) = add_task_test();
+        let scenario = &mut scenario_val;
+
+        get_verifier(scenario);
+
+        mint_token(scenario, get_USER_1());
+        start_task(scenario, get_USER_1(), task_id);
+
+        finish_task(scenario, get_USER_1(), task_id);
+
+        start_task(scenario, get_USER_1(), task_id);
+
+        test_scenario::end(scenario_val);
+    }
+
+    #[test]
+    #[expected_failure(abort_code = 0)]
+    public fun fail_finish_task_twice_test() {
+        let (scenario_val, task_id) = add_task_test();
+        let scenario = &mut scenario_val;
+
+        get_verifier(scenario);
+
+        mint_token(scenario, get_USER_1());
+        start_task(scenario, get_USER_1(), task_id);
+
+        finish_task(scenario, get_USER_1(), task_id);
+        finish_task(scenario, get_USER_1(), task_id);
+        
+        test_scenario::end(scenario_val);
+    }
+
+     #[test]
+    #[expected_failure(abort_code = 1)]
+    public fun fail_finish_not_started_task_test() {
+        let (scenario_val, task_id) = add_task_test();
+        let scenario = &mut scenario_val;
+
+        get_verifier(scenario);
+        mint_token(scenario, get_USER_1());
+
+        finish_task(scenario, get_USER_1(), task_id);
+        
+        test_scenario::end(scenario_val);
     }
 
     #[test]
