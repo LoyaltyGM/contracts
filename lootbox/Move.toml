@@ -9,7 +9,7 @@ Sui = { local = "../../sui/crates/sui-framework" }
 git = "https://github.com/LoyaltyGM/movemate.git"
 subdir = "sui"
 # devnet-0.18.0
-rev = "2410981b1b667961be787a634e2708f062791de1"
+rev = "a9b1ff5919cb5e9f6e44fd663cb84db344c171eb"
 
 [addresses]
 lootbox = "0x0"
