@@ -16,10 +16,11 @@ Its functions are only accessible by the friend modules.
 -  [Function `add_task`](#0x0_task_store_add_task)
 -  [Function `remove_task`](#0x0_task_store_remove_task)
 -  [Function `get_task_reward`](#0x0_task_store_get_task_reward)
+-  [Function `to_string_vec`](#0x0_task_store_to_string_vec)
 
 
-<pre><code><b>use</b> <a href="utils.md#0x0_utils">0x0::utils</a>;
-<b>use</b> <a href="">0x1::string</a>;
+<pre><code><b>use</b> <a href="">0x1::string</a>;
+<b>use</b> <a href="">0x1::vector</a>;
 <b>use</b> <a href="">0x2::event</a>;
 <b>use</b> <a href="">0x2::object</a>;
 <b>use</b> <a href="">0x2::tx_context</a>;
@@ -250,7 +251,7 @@ The arguments are the arguments that need to be passed to the function.
         package_id,
         module_name: <a href="_utf8">string::utf8</a>(module_name),
         function_name: <a href="_utf8">string::utf8</a>(function_name),
-        arguments: <a href="utils.md#0x0_utils_to_string_vec">utils::to_string_vec</a>(arguments),
+        arguments: <a href="task_store.md#0x0_task_store_to_string_vec">to_string_vec</a>(arguments),
     };
 
     emit(<a href="task_store.md#0x0_task_store_CreateTaskEvent">CreateTaskEvent</a> {
@@ -313,6 +314,38 @@ Returns the task reward amount for the given task ID.
 
 <pre><code><b>public</b> <b>fun</b> <a href="task_store.md#0x0_task_store_get_task_reward">get_task_reward</a>(store: &VecMap&lt;ID, <a href="task_store.md#0x0_task_store_Task">Task</a>&gt;, task_id: &ID): u64 {
    <a href="_get">vec_map::get</a>(store, task_id).reward_exp
+}
+</code></pre>
+
+
+
+</details>
+
+<a name="0x0_task_store_to_string_vec"></a>
+
+## Function `to_string_vec`
+
+Converts a vector of vectors of u8 to a vector of strings
+
+
+<pre><code><b>fun</b> <a href="task_store.md#0x0_task_store_to_string_vec">to_string_vec</a>(args: <a href="">vector</a>&lt;<a href="">vector</a>&lt;u8&gt;&gt;): <a href="">vector</a>&lt;<a href="_String">string::String</a>&gt;
+</code></pre>
+
+
+
+<details>
+<summary>Implementation</summary>
+
+
+<pre><code><b>fun</b> <a href="task_store.md#0x0_task_store_to_string_vec">to_string_vec</a>(args: <a href="">vector</a>&lt;<a href="">vector</a>&lt;u8&gt;&gt;): <a href="">vector</a>&lt;String&gt; {
+    <b>let</b> string_args = <a href="_empty">vector::empty</a>&lt;String&gt;();
+    <a href="_reverse">vector::reverse</a>(&<b>mut</b> args);
+
+    <b>while</b>(!<a href="_is_empty">vector::is_empty</a>(&args)) {
+        <a href="_push_back">vector::push_back</a>(&<b>mut</b> string_args, <a href="_utf8">string::utf8</a>(<a href="_pop_back">vector::pop_back</a>(&<b>mut</b> args)))
+    };
+
+    string_args
 }
 </code></pre>
 

@@ -5,8 +5,8 @@
 
 
 Loyalty Token module.
-This module contains the LoyaltyToken struct and its functions.
-Module for minting and managing LoyaltyTokens by users.
+This module contains the Loyalty NFT struct and its functions.
+Module for minting and managing Loyalty NFT by users.
 
 
 -  [Resource `LoyaltyToken`](#0x0_loyalty_token_LoyaltyToken)

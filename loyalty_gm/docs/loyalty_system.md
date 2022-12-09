@@ -807,6 +807,9 @@ This function is called by publisher.
 ## Function `get_name`
 
 
+Get the name of the loyalty system.
+
+
 
 <pre><code><b>public</b> <b>fun</b> <a href="loyalty_system.md#0x0_loyalty_system_get_name">get_name</a>(<a href="loyalty_system.md#0x0_loyalty_system">loyalty_system</a>: &<a href="loyalty_system.md#0x0_loyalty_system_LoyaltySystem">loyalty_system::LoyaltySystem</a>): &<a href="_String">string::String</a>
 </code></pre>
