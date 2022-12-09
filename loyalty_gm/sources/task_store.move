@@ -1,7 +1,9 @@
+/**
+    Task Store module.
+    This module is responsible for storing all the tasks in the system.
+    Its functions are only accessible by the friend modules.
+*/
 module loyalty_gm::task_store {
-    // id to task
-    // ======== store: VecMap<String, Task> =========
-    
     friend loyalty_gm::loyalty_system;
     friend loyalty_gm::loyalty_token;
 
@@ -27,14 +29,24 @@ module loyalty_gm::task_store {
 
     // ======== Structs =========
 
+    /**
+        Task struct.
+        This struct represents a task that the user can complete.
+        The task is represented by a function that needs to be executed.
+    */
     struct Task has store, drop {
         id: ID,
         name: String,
         description: String,
+        /// The amount of XP that the user will receive upon completing the task
         reward_exp: u64,
+        /// The ID of the package that contains the function that needs to be executed
         package_id: ID,
+        /// The name of the module that contains the function that needs to be executed
         module_name: String,
+        /// The name of the function that needs to be executed
         function_name: String,
+        /// The arguments that need to be passed to the function
         arguments: vector<String>,
     }
 
@@ -51,10 +63,20 @@ module loyalty_gm::task_store {
     
     // ======== Friend functions =========
 
+    /**
+        Creates a new empty task store.
+        Store represents a map of task IDs to tasks.
+    */
     public(friend) fun empty(): VecMap<ID, Task> {  
         vec_map::empty<ID, Task>()
     }
 
+    /**
+        Creates a new task and adds it to the store.
+        The task is represented by a function that needs to be executed.
+        The function is identified by the package ID, module name and function name.
+        The arguments are the arguments that need to be passed to the function.
+    */
     public(friend) fun add_task(
         store: &mut VecMap<ID, Task>,
         name: vector<u8>,
@@ -91,10 +113,16 @@ module loyalty_gm::task_store {
         vec_map::insert(store, id, task);
     }
 
+    /**
+        Removes a task from the store.
+    */
     public(friend) fun remove_task(store: &mut VecMap<ID, Task>, task_id: ID) {
         vec_map::remove(store, &task_id);
     }
 
+    /**
+        Returns the task reward amount for the given task ID.
+    */
     public fun get_task_reward(store: &VecMap<ID, Task>, task_id: &ID): u64 {
        vec_map::get(store, task_id).reward_exp
     }

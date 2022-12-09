@@ -1,3 +1,8 @@
+/**
+    Loyalty Token module.
+    This module contains the LoyaltyToken struct and its functions.
+    Module for minting and managing LoyaltyTokens by users.
+*/
 module loyalty_gm::loyalty_token {
     use std::string::{Self, String};
 
@@ -25,16 +30,23 @@ module loyalty_gm::loyalty_token {
 
     // ======== Structs =========
 
-    /// Loyalty NFT.
+    /**
+        LoyaltyToken struct.
+        This struct represents a LoyaltyToken.
+        It contains the ID of the LoyaltySystem it belongs to, its name, description, url, level and XP.
+    */
     struct LoyaltyToken has key {
         id: UID,
+        /// ID of the LoyaltySystem which this token belongs to.
         loyalty_system: ID,
         name: String,
         description: String,
         url: Url,
-        
+        /// Current level of the token.
         lvl: u64,
+        /// Current XP of the token.
         xp: u64,
+        /// XP needed to reach the next level.
         xp_to_next_lvl: u64,
     }
 
@@ -56,6 +68,10 @@ module loyalty_gm::loyalty_token {
 
     // ======= Public functions =======
 
+    /**
+        Mint a new LoyaltyToken for the given LoyaltySystem.
+        The token is minted with the same name, description and url as the LoyaltySystem.
+    */
     public entry fun mint(
         ls: &mut LoyaltySystem,
         ctx: &mut TxContext
@@ -85,6 +101,11 @@ module loyalty_gm::loyalty_token {
         transfer::transfer(nft, sender);
     }
 
+    /**
+        Claim the XP earned by the given token.
+        The token's level and XP to next level are updated accordingly.
+        Aborts if the token has no XP to claim.
+    */
     public entry fun claim_xp (
         ls: &mut LoyaltySystem,
         token: &mut LoyaltyToken, 
@@ -105,6 +126,10 @@ module loyalty_gm::loyalty_token {
         update_token_stats(claimable_xp, ls, token);
     }
 
+    /**
+        Claim the reward for the given token for the given level.
+        Aborts if the token's level is lower than the reward's level.
+    */
     public entry fun claim_reward (
         ls: &mut LoyaltySystem,
         token: &LoyaltyToken, 
@@ -115,10 +140,20 @@ module loyalty_gm::loyalty_token {
         reward_store::claim_reward(loyalty_system::get_mut_reward(ls, reward_lvl), ctx);
     }
 
-    // ======== Admin Functions =========
+    /**
+        This function is called by the user.
+        User function to start task.
+        Verifier cant finish task if user didnt start it.
+    */
+    public entry fun start_task(loyalty_system: &mut LoyaltySystem, task_id: ID, ctx: &mut TxContext) {
+        user_store::start_task(loyalty_system::get_mut_user_store(loyalty_system), task_id, tx_context::sender(ctx))
+    }
 
     // ======= Private and Utility functions =======
 
+    /**
+        Update the token's level and XP based on the given XP to add.
+    */
     fun update_token_stats(
         xp_to_add: u64,
         ls: &mut LoyaltySystem,
@@ -134,14 +169,23 @@ module loyalty_gm::loyalty_token {
         token.lvl = if (new_lvl <= max_lvl) new_lvl else max_lvl;
     }
     
+    /**
+        Get the level of the token based on its XP.
+    */
     fun get_lvl_by_xp(xp: u64): u64 {
         math::sqrt(xp/LVL_DIVIDER)
     }
 
+    /**
+        Get the XP needed to reach the given level.
+    */
     fun get_xp_by_lvl(lvl: u64): u64 {
         lvl * lvl * LVL_DIVIDER
     }
-
+    
+    /**
+        Get the XP needed to reach the next level by current level and XP.
+    */
     fun get_xp_to_next_lvl(lvl: u64, xp: u64): u64 {
         get_xp_by_lvl(lvl + 1) - xp
     }

@@ -4,8 +4,13 @@
 # Module `0x0::task_store`
 
 
+Task Store module.
+This module is responsible for storing all the tasks in the system.
+Its functions are only accessible by the friend modules.
+
 
 -  [Struct `Task`](#0x0_task_store_Task)
+-  [Struct `CreateTaskEvent`](#0x0_task_store_CreateTaskEvent)
 -  [Constants](#@Constants_0)
 -  [Function `empty`](#0x0_task_store_empty)
 -  [Function `add_task`](#0x0_task_store_add_task)
@@ -15,6 +20,7 @@
 
 <pre><code><b>use</b> <a href="utils.md#0x0_utils">0x0::utils</a>;
 <b>use</b> <a href="">0x1::string</a>;
+<b>use</b> <a href="">0x2::event</a>;
 <b>use</b> <a href="">0x2::object</a>;
 <b>use</b> <a href="">0x2::tx_context</a>;
 <b>use</b> <a href="">0x2::vec_map</a>;
@@ -25,6 +31,11 @@
 <a name="0x0_task_store_Task"></a>
 
 ## Struct `Task`
+
+
+Task struct.
+This struct represents a task that the user can complete.
+The task is represented by a function that needs to be executed.
 
 
 
@@ -60,31 +71,64 @@
 <code>reward_exp: u64</code>
 </dt>
 <dd>
-
+ The amount of XP that the user will receive upon completing the task
 </dd>
 <dt>
 <code>package_id: <a href="_ID">object::ID</a></code>
 </dt>
 <dd>
-
+ The ID of the package that contains the function that needs to be executed
 </dd>
 <dt>
 <code>module_name: <a href="_String">string::String</a></code>
 </dt>
 <dd>
-
+ The name of the module that contains the function that needs to be executed
 </dd>
 <dt>
 <code>function_name: <a href="_String">string::String</a></code>
 </dt>
 <dd>
-
+ The name of the function that needs to be executed
 </dd>
 <dt>
 <code>arguments: <a href="">vector</a>&lt;<a href="_String">string::String</a>&gt;</code>
 </dt>
 <dd>
+ The arguments that need to be passed to the function
+</dd>
+</dl>
 
+
+</details>
+
+<a name="0x0_task_store_CreateTaskEvent"></a>
+
+## Struct `CreateTaskEvent`
+
+
+
+<pre><code><b>struct</b> <a href="task_store.md#0x0_task_store_CreateTaskEvent">CreateTaskEvent</a> <b>has</b> <b>copy</b>, drop
+</code></pre>
+
+
+
+<details>
+<summary>Fields</summary>
+
+
+<dl>
+<dt>
+<code>task_id: <a href="_ID">object::ID</a></code>
+</dt>
+<dd>
+ Object ID of the Task
+</dd>
+<dt>
+<code>name: <a href="_String">string::String</a></code>
+</dt>
+<dd>
+ Name of the Task
 </dd>
 </dl>
 
@@ -137,6 +181,10 @@
 ## Function `empty`
 
 
+Creates a new empty task store.
+Store represents a map of task IDs to tasks.
+
+
 
 <pre><code><b>public</b>(<b>friend</b>) <b>fun</b> <a href="task_store.md#0x0_task_store_empty">empty</a>(): <a href="_VecMap">vec_map::VecMap</a>&lt;<a href="_ID">object::ID</a>, <a href="task_store.md#0x0_task_store_Task">task_store::Task</a>&gt;
 </code></pre>
@@ -159,6 +207,12 @@
 <a name="0x0_task_store_add_task"></a>
 
 ## Function `add_task`
+
+
+Creates a new task and adds it to the store.
+The task is represented by a function that needs to be executed.
+The function is identified by the package ID, module name and function name.
+The arguments are the arguments that need to be passed to the function.
 
 
 
@@ -198,6 +252,12 @@
         function_name: <a href="_utf8">string::utf8</a>(function_name),
         arguments: <a href="utils.md#0x0_utils_to_string_vec">utils::to_string_vec</a>(arguments),
     };
+
+    emit(<a href="task_store.md#0x0_task_store_CreateTaskEvent">CreateTaskEvent</a> {
+        task_id: id,
+        name: task.name,
+    });
+
     <a href="_insert">vec_map::insert</a>(store, id, task);
 }
 </code></pre>
@@ -209,6 +269,9 @@
 <a name="0x0_task_store_remove_task"></a>
 
 ## Function `remove_task`
+
+
+Removes a task from the store.
 
 
 
@@ -233,6 +296,9 @@
 <a name="0x0_task_store_get_task_reward"></a>
 
 ## Function `get_task_reward`
+
+
+Returns the task reward amount for the given task ID.
 
 
 

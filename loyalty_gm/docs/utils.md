@@ -19,6 +19,9 @@
 ## Function `to_string_vec`
 
 
+Converts a vector of u8 vectors to a vector of strings
+
+
 
 <pre><code><b>public</b> <b>fun</b> <a href="utils.md#0x0_utils_to_string_vec">to_string_vec</a>(args: <a href="">vector</a>&lt;<a href="">vector</a>&lt;u8&gt;&gt;): <a href="">vector</a>&lt;<a href="_String">string::String</a>&gt;
 </code></pre>

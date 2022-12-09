@@ -1,3 +1,8 @@
+/**
+    Loyalty System Module.
+    This module contains the implementation of the Loyalty System.
+    Module for creating and managing loyalty systems by the admin and verifying tasks by the verifier.
+*/
 module loyalty_gm::loyalty_system {
     friend loyalty_gm::loyalty_token;
 
@@ -27,7 +32,6 @@ module loyalty_gm::loyalty_system {
     const BASIC_MAX_LVL: u64 = 100;
 
     // ======== Error codes =========
-
     const EAdminOnly: u64 = 0;
     const ETextOverflow: u64 = 1;
     const EInvalidLevel: u64 = 2;
@@ -36,53 +40,69 @@ module loyalty_gm::loyalty_system {
 
     // ======== Structs =========
 
+    /**
+        Admin capability to manage the loyalty system.
+        Created separately for each system.
+    */ 
     struct AdminCap has key, store { 
         id: UID,
         loyalty_system: ID,
     }
 
+    /**
+        Verifier capability to finish tasks.
+        Created once per package.
+    */ 
     struct VerifierCap has key, store {
         id: UID,
     }
     
+    /**
+        Loyalty system struct.
+        Contains all the information about the loyalty system.
+        Contains the user store in the dynamic field.
+    */
     struct LoyaltySystem has key {
-        // collection
         id: UID,
-        // Loyalty token name
+        /// Loyalty system name
         name: String,
-        // Loyalty token description
+        /// Loyalty system description
         description: String,
-        // Total number of NFTs that have been issued. 
+        /// Total number of NFTs that have been issued. 
         total_minted: u64,
-        // Loyalty token total max supply
+        /// Loyalty NFTs total max supply
         max_supply: u64,
-        // Loyalty token image url
+        /// Loyalty system image url
         url: Url,
         creator: address,
-
-
-        // tasks & rewards
+        /// Max level of the loyalty NFTs
         max_lvl: u64,
-        // lvl_threshold: vector<u64>,
+        /// Tasks of the loyalty system task_ID -> Task
         tasks: VecMap<ID, Task>,
+        /// Rewards of the loyalty system reward_lvl -> Reward
         rewards: VecMap<u64, Reward>,
 
-        // --dynamic fields--
-        // user_store: Table<address, User>,
+        /*
+            --dynamic fields--
+            /// User store of the loyalty system user_address -> User
+            user_store: Table<address, User>,
+        */ 
     }
 
     // ======== Events =========
 
     struct CreateLoyaltySystemEvent has copy, drop {
-        // The Object ID of the NFT
+        /// The Object ID of the NFT
         object_id: ID,
-        // The creator of the NFT
+        /// The creator of the NFT
         creator: address,
-        // The name of the NFT
+        /// The name of the NFT
         name: string::String,
     }
 
     // ======== Init =========
+
+    /// Transfer to publisher VerifierCap
     fun init(ctx: &mut TxContext) {
         transfer::transfer(VerifierCap {
             id: object::new(ctx)
@@ -91,6 +111,11 @@ module loyalty_gm::loyalty_system {
 
     // ======== Admin Functions =========
 
+    /**
+        Create a new loyalty system.
+        Transfer to the creator AdminCap.
+        The creator of the system will be the admin of the system.
+    */ 
     public entry fun create_loyalty_system(
         name: vector<u8>, 
         description: vector<u8>, 
@@ -161,6 +186,10 @@ module loyalty_gm::loyalty_system {
 
     // ======== Admin Functions: Rewards
 
+    /**
+        Add a new reward to the loyalty system.
+        Users can claim rewards by reaching a certain level.
+    */ 
     public entry fun add_reward(
         admin_cap: &AdminCap, 
         loyalty_system: &mut LoyaltySystem,
@@ -184,7 +213,10 @@ module loyalty_gm::loyalty_system {
             ctx
         );
     }
-
+    
+    /**
+        Remove a reward from the loyalty system.
+    */
     public entry fun remove_reward(admin_cap: &AdminCap, loyalty_system: &mut LoyaltySystem, level: u64, ctx: &mut TxContext) {
         check_admin(admin_cap, loyalty_system);
 
@@ -193,6 +225,10 @@ module loyalty_gm::loyalty_system {
 
     // ======== Admin Functions: Tasks
 
+    /**
+        Add a new task to the loyalty system.
+        Users can complete tasks to earn XP.
+    */
     public entry fun add_task(
         admin_cap: &AdminCap, 
         loyalty_system: &mut LoyaltySystem,
@@ -220,6 +256,9 @@ module loyalty_gm::loyalty_system {
         );
     }
 
+    /**
+        Remove a task from the loyalty system.
+    */
     public entry fun remove_task(
         admin_cap: &AdminCap, 
         loyalty_system: &mut LoyaltySystem, 
@@ -233,6 +272,10 @@ module loyalty_gm::loyalty_system {
 
     // ======= Verifier functions =======
 
+    /**
+        Verifier function to finish a task.
+        This function is called by publisher.
+    */
     public entry fun finish_task(
         _: &VerifierCap,
         loyalty_system: &mut LoyaltySystem, 
@@ -247,12 +290,6 @@ module loyalty_gm::loyalty_system {
             user,
             reward_xp
         )
-    }
-
-    // ======= User functions =======
-
-    public entry fun start_task(loyalty_system: &mut LoyaltySystem, task_id: ID, ctx: &mut TxContext) {
-        user_store::start_task(get_mut_user_store(loyalty_system), task_id, tx_context::sender(ctx))
     }
 
     // ======= Public functions =======

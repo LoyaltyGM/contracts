@@ -4,6 +4,9 @@
 # Module `0x0::system_store`
 
 
+System Store is a module that stores all the loyalty systems IDs that are created.
+It is a singleton module that is created when package is published/
+
 
 -  [Struct `SYSTEM_STORE`](#0x0_system_store_SYSTEM_STORE)
 -  [Resource `SystemStore`](#0x0_system_store_SystemStore)
@@ -25,6 +28,9 @@
 <a name="0x0_system_store_SYSTEM_STORE"></a>
 
 ## Struct `SYSTEM_STORE`
+
+
+The SYSTEM_STORE struct is a witness that the module is a singleton module.
 
 
 
@@ -52,6 +58,9 @@
 <a name="0x0_system_store_SystemStore"></a>
 
 ## Resource `SystemStore`
+
+
+The SystemStore struct contains the vector of loyalty systems IDs.
 
 
 
@@ -87,6 +96,9 @@
 ## Function `init`
 
 
+The init function creates the SystemStore when the package is published and shares it.
+
+
 
 <pre><code><b>fun</b> <a href="system_store.md#0x0_system_store_init">init</a>(_: <a href="system_store.md#0x0_system_store_SYSTEM_STORE">system_store::SYSTEM_STORE</a>, ctx: &<b>mut</b> <a href="_TxContext">tx_context::TxContext</a>)
 </code></pre>
@@ -116,6 +128,9 @@
 ## Function `add_system`
 
 
+The add_system function adds a new loyalty system ID to the vector.
+
+
 
 <pre><code><b>public</b>(<b>friend</b>) <b>fun</b> <a href="system_store.md#0x0_system_store_add_system">add_system</a>(store: &<b>mut</b> <a href="system_store.md#0x0_system_store_SystemStore">system_store::SystemStore</a>&lt;<a href="system_store.md#0x0_system_store_SYSTEM_STORE">system_store::SYSTEM_STORE</a>&gt;, loyalty_system_id: <a href="_ID">object::ID</a>, _: &<b>mut</b> <a href="_TxContext">tx_context::TxContext</a>)
 </code></pre>
@@ -138,6 +153,9 @@
 <a name="0x0_system_store_length"></a>
 
 ## Function `length`
+
+
+Returns the length of the vector.
 
 
 
@@ -164,6 +182,9 @@
 ## Function `contains`
 
 
+Returns true if the vector contains the given system ID.
+
+
 
 <pre><code><b>public</b> <b>fun</b> <a href="system_store.md#0x0_system_store_contains">contains</a>(store: &<a href="system_store.md#0x0_system_store_SystemStore">system_store::SystemStore</a>&lt;<a href="system_store.md#0x0_system_store_SYSTEM_STORE">system_store::SYSTEM_STORE</a>&gt;, key: <a href="_ID">object::ID</a>): bool
 </code></pre>
@@ -186,6 +207,9 @@
 <a name="0x0_system_store_borrow"></a>
 
 ## Function `borrow`
+
+
+Returns the system ID at the given index.
 
 
 

@@ -1,7 +1,9 @@
+/**
+    Reward Store Module.
+    This module is responsible for managing the rewards for the loyalty system.
+    Its functions are only accessible by the friend modules.
+*/
 module loyalty_gm::reward_store {
-    // level to reward
-    // ======== store: VecMap<u64, Reward> =========
-    
     friend loyalty_gm::loyalty_system;
     friend loyalty_gm::loyalty_token;
 
@@ -33,6 +35,10 @@ module loyalty_gm::reward_store {
 
     // ======== Structs =========
 
+    /**
+        Reward struct.
+        This struct represents a reward for the loyalty system.
+    */
     struct Reward has key, store {
         id: UID,
         level: u64,
@@ -57,10 +63,19 @@ module loyalty_gm::reward_store {
 
     // ======== Public functions =========
 
+    /**
+        Creates a new Reward Store.
+        It represents a map of rewards, where the key is the level of the reward.
+    */
     public(friend) fun empty(): VecMap<u64, Reward> {  
         vec_map::empty<u64, Reward>()
     }
 
+    /**
+        Adds a new reward to the store.
+        It creates a new Reward struct and adds it to the store.
+        It also creates a new table for the current reward recipients.
+    */
     public(friend) fun add_reward(
         store: &mut VecMap<u64, Reward>,
         level: u64, 
@@ -94,6 +109,10 @@ module loyalty_gm::reward_store {
         vec_map::insert(store, level, reward);
     }
 
+    /**
+        Removes a reward from the store.
+        It removes the reward from the store and transfers the reward pool to the sender.
+    */
     public(friend) fun remove_reward(store: &mut VecMap<u64, Reward>, level: u64, ctx: &mut TxContext) {
         let (_, reward) =  vec_map::remove(store, &level);
 
@@ -106,6 +125,12 @@ module loyalty_gm::reward_store {
         delete_reward(reward); 
     }
 
+    /**
+        Claims a reward.
+        It checks if the reward has already been claimed by the sender.
+        It checks if the reward pool has enough funds.
+        It transfers the reward to the sender and sets the reward as claimed.
+    */
     public(friend) fun claim_reward(
         reward: &mut Reward,
         ctx: &mut TxContext
@@ -125,6 +150,10 @@ module loyalty_gm::reward_store {
 
     // ======== Private functions =========
 
+    /**
+        Sets the reward as claimed by the sender.
+        It adds the sender to the reward recipients table.
+    */
     fun set_reward_claimed(reward: &mut Reward, ctx: &mut TxContext) {
         table::add<address, bool>(
             dof::borrow_mut(&mut reward.id, REWARD_RECIPIENTS_KEY), 
@@ -133,6 +162,9 @@ module loyalty_gm::reward_store {
         );
     }
 
+    /**
+        Checks if the reward has already been claimed by the sender.
+    */
     fun check_claimed(reward: &Reward, ctx: &mut TxContext) {
         assert!(
             !table::contains<address, bool>(
@@ -143,6 +175,10 @@ module loyalty_gm::reward_store {
         );
     }
 
+    /**
+        Deletes a reward.
+        It destroys the reward pool and deletes the reward.
+    */
     fun delete_reward(reward: Reward) {
         let Reward {
             id, 

@@ -4,6 +4,10 @@
 # Module `0x0::user_store`
 
 
+User Store Module.
+This module is responsible for storing user data.
+Its functions are only accessible by the friend modules.
+
 
 -  [Struct `User`](#0x0_user_store_User)
 -  [Constants](#@Constants_0)
@@ -32,6 +36,9 @@
 ## Struct `User`
 
 
+User data.
+
+
 
 <pre><code><b>struct</b> <a href="user_store.md#0x0_user_store_User">User</a> <b>has</b> drop, store
 </code></pre>
@@ -53,25 +60,25 @@
 <code>owner: <b>address</b></code>
 </dt>
 <dd>
-
+ Address of the user that data belongs to.
 </dd>
 <dt>
 <code>active_tasks: <a href="_VecSet">vec_set::VecSet</a>&lt;<a href="_ID">object::ID</a>&gt;</code>
 </dt>
 <dd>
-
+ Tasks that are currently active.
 </dd>
 <dt>
 <code>done_tasks: <a href="_VecSet">vec_set::VecSet</a>&lt;<a href="_ID">object::ID</a>&gt;</code>
 </dt>
 <dd>
-
+ Tasks that are already done.
 </dd>
 <dt>
 <code>claimable_xp: u64</code>
 </dt>
 <dd>
-
+ XP that can be claimed by the user. It is reset to INITIAL_XP after claiming.
 </dd>
 </dl>
 
@@ -115,6 +122,10 @@
 ## Function `new`
 
 
+Create a new user store.
+It represents a table that maps user addresses to user data.
+
+
 
 <pre><code><b>public</b>(<b>friend</b>) <b>fun</b> <a href="user_store.md#0x0_user_store_new">new</a>(ctx: &<b>mut</b> <a href="_TxContext">tx_context::TxContext</a>): <a href="_Table">table::Table</a>&lt;<b>address</b>, <a href="user_store.md#0x0_user_store_User">user_store::User</a>&gt;
 </code></pre>
@@ -137,6 +148,9 @@
 <a name="0x0_user_store_add_user"></a>
 
 ## Function `add_user`
+
+
+Add a new user to the store.
 
 
 
@@ -176,6 +190,9 @@
 ## Function `update_user_xp`
 
 
+Update the user's XP.
+
+
 
 <pre><code><b>public</b>(<b>friend</b>) <b>fun</b> <a href="user_store.md#0x0_user_store_update_user_xp">update_user_xp</a>(store: &<b>mut</b> <a href="_Table">table::Table</a>&lt;<b>address</b>, <a href="user_store.md#0x0_user_store_User">user_store::User</a>&gt;, owner: <b>address</b>, reward_xp: u64)
 </code></pre>
@@ -205,6 +222,9 @@
 ## Function `reset_user_xp`
 
 
+Reset the user's XP to INITIAL_XP.
+
+
 
 <pre><code><b>public</b>(<b>friend</b>) <b>fun</b> <a href="user_store.md#0x0_user_store_reset_user_xp">reset_user_xp</a>(store: &<b>mut</b> <a href="_Table">table::Table</a>&lt;<b>address</b>, <a href="user_store.md#0x0_user_store_User">user_store::User</a>&gt;, owner: <b>address</b>)
 </code></pre>
@@ -228,6 +248,9 @@
 <a name="0x0_user_store_start_task"></a>
 
 ## Function `start_task`
+
+
+Start a task with the given ID for the user.
 
 
 
@@ -254,6 +277,9 @@
 <a name="0x0_user_store_finish_task"></a>
 
 ## Function `finish_task`
+
+
+Finish a task with the given ID for the user.
 
 
 
@@ -293,6 +319,9 @@
 ## Function `size`
 
 
+Get the size of the user store.
+
+
 
 <pre><code><b>public</b> <b>fun</b> <a href="user_store.md#0x0_user_store_size">size</a>(store: &<a href="_Table">table::Table</a>&lt;<b>address</b>, <a href="user_store.md#0x0_user_store_User">user_store::User</a>&gt;): u64
 </code></pre>
@@ -315,6 +344,9 @@
 <a name="0x0_user_store_get_user"></a>
 
 ## Function `get_user`
+
+
+Get the user data for the given address.
 
 
 
@@ -341,6 +373,9 @@
 ## Function `user_exists`
 
 
+Check if the user exists in the store.
+
+
 
 <pre><code><b>public</b> <b>fun</b> <a href="user_store.md#0x0_user_store_user_exists">user_exists</a>(<a href="">table</a>: &<a href="_Table">table::Table</a>&lt;<b>address</b>, <a href="user_store.md#0x0_user_store_User">user_store::User</a>&gt;, owner: <b>address</b>): bool
 </code></pre>
@@ -363,6 +398,9 @@
 <a name="0x0_user_store_get_user_xp"></a>
 
 ## Function `get_user_xp`
+
+
+Get the user's claimable XP.
 
 
 

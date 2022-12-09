@@ -4,8 +4,13 @@
 # Module `0x0::reward_store`
 
 
+Reward Store Module.
+This module is responsible for managing the rewards for the loyalty system.
+Its functions are only accessible by the friend modules.
+
 
 -  [Resource `Reward`](#0x0_reward_store_Reward)
+-  [Struct `CreateRewardEvent`](#0x0_reward_store_CreateRewardEvent)
 -  [Constants](#@Constants_0)
 -  [Function `empty`](#0x0_reward_store_empty)
 -  [Function `add_reward`](#0x0_reward_store_add_reward)
@@ -20,6 +25,7 @@
 <b>use</b> <a href="">0x2::balance</a>;
 <b>use</b> <a href="">0x2::coin</a>;
 <b>use</b> <a href="">0x2::dynamic_object_field</a>;
+<b>use</b> <a href="">0x2::event</a>;
 <b>use</b> <a href="">0x2::object</a>;
 <b>use</b> <a href="">0x2::sui</a>;
 <b>use</b> <a href="">0x2::table</a>;
@@ -34,6 +40,10 @@
 <a name="0x0_reward_store_Reward"></a>
 
 ## Resource `Reward`
+
+
+Reward struct.
+This struct represents a reward for the loyalty system.
 
 
 
@@ -88,6 +98,45 @@
 </dt>
 <dd>
 
+</dd>
+</dl>
+
+
+</details>
+
+<a name="0x0_reward_store_CreateRewardEvent"></a>
+
+## Struct `CreateRewardEvent`
+
+
+
+<pre><code><b>struct</b> <a href="reward_store.md#0x0_reward_store_CreateRewardEvent">CreateRewardEvent</a> <b>has</b> <b>copy</b>, drop
+</code></pre>
+
+
+
+<details>
+<summary>Fields</summary>
+
+
+<dl>
+<dt>
+<code>reward_id: <a href="_ID">object::ID</a></code>
+</dt>
+<dd>
+ Object ID of the Reward
+</dd>
+<dt>
+<code>lvl: u64</code>
+</dt>
+<dd>
+ Lvl of the Reward
+</dd>
+<dt>
+<code>description: <a href="_String">string::String</a></code>
+</dt>
+<dd>
+ Description of the Reward
 </dd>
 </dl>
 
@@ -158,6 +207,10 @@
 ## Function `empty`
 
 
+Creates a new Reward Store.
+It represents a map of rewards, where the key is the level of the reward.
+
+
 
 <pre><code><b>public</b>(<b>friend</b>) <b>fun</b> <a href="reward_store.md#0x0_reward_store_empty">empty</a>(): <a href="_VecMap">vec_map::VecMap</a>&lt;u64, <a href="reward_store.md#0x0_reward_store_Reward">reward_store::Reward</a>&gt;
 </code></pre>
@@ -180,6 +233,11 @@
 <a name="0x0_reward_store_add_reward"></a>
 
 ## Function `add_reward`
+
+
+Adds a new reward to the store.
+It creates a new Reward struct and adds it to the store.
+It also creates a new table for the current reward recipients.
 
 
 
@@ -205,7 +263,7 @@
     <b>let</b> balance_val = <a href="_value">balance::value</a>(&<a href="">balance</a>);
     <b>assert</b>!(balance_val % reward_supply == 0, <a href="reward_store.md#0x0_reward_store_EInvalidSupply">EInvalidSupply</a>);
 
-    <b>let</b> reward_info = <a href="reward_store.md#0x0_reward_store_Reward">Reward</a> {
+    <b>let</b> reward = <a href="reward_store.md#0x0_reward_store_Reward">Reward</a> {
         id: <a href="_new">object::new</a>(ctx),
         level,
         <a href="">url</a>: <a href="_new_unsafe_from_bytes">url::new_unsafe_from_bytes</a>(<a href="">url</a>),
@@ -215,8 +273,14 @@
         reward_per_user: balance_val / reward_supply,
     };
 
-    dof::add(&<b>mut</b> reward_info.id, <a href="reward_store.md#0x0_reward_store_REWARD_RECIPIENTS_KEY">REWARD_RECIPIENTS_KEY</a>, <a href="_new">table::new</a>&lt;<b>address</b>, bool&gt;(ctx));
-    <a href="_insert">vec_map::insert</a>(store, level, reward_info);
+    emit(<a href="reward_store.md#0x0_reward_store_CreateRewardEvent">CreateRewardEvent</a> {
+        reward_id: <a href="_id">object::id</a>(&reward),
+        lvl: reward.level,
+        description: reward.description,
+    });
+
+    dof::add(&<b>mut</b> reward.id, <a href="reward_store.md#0x0_reward_store_REWARD_RECIPIENTS_KEY">REWARD_RECIPIENTS_KEY</a>, <a href="_new">table::new</a>&lt;<b>address</b>, bool&gt;(ctx));
+    <a href="_insert">vec_map::insert</a>(store, level, reward);
 }
 </code></pre>
 
@@ -227,6 +291,10 @@
 <a name="0x0_reward_store_remove_reward"></a>
 
 ## Function `remove_reward`
+
+
+Removes a reward from the store.
+It removes the reward from the store and transfers the reward pool to the sender.
 
 
 
@@ -259,6 +327,12 @@
 <a name="0x0_reward_store_claim_reward"></a>
 
 ## Function `claim_reward`
+
+
+Claims a reward.
+It checks if the reward has already been claimed by the sender.
+It checks if the reward pool has enough funds.
+It transfers the reward to the sender and sets the reward as claimed.
 
 
 
@@ -298,6 +372,10 @@
 ## Function `set_reward_claimed`
 
 
+Sets the reward as claimed by the sender.
+It adds the sender to the reward recipients table.
+
+
 
 <pre><code><b>fun</b> <a href="reward_store.md#0x0_reward_store_set_reward_claimed">set_reward_claimed</a>(reward: &<b>mut</b> <a href="reward_store.md#0x0_reward_store_Reward">reward_store::Reward</a>, ctx: &<b>mut</b> <a href="_TxContext">tx_context::TxContext</a>)
 </code></pre>
@@ -324,6 +402,9 @@
 <a name="0x0_reward_store_check_claimed"></a>
 
 ## Function `check_claimed`
+
+
+Checks if the reward has already been claimed by the sender.
 
 
 
@@ -354,6 +435,10 @@
 <a name="0x0_reward_store_delete_reward"></a>
 
 ## Function `delete_reward`
+
+
+Deletes a reward.
+It destroys the reward pool and deletes the reward.
 
 
 

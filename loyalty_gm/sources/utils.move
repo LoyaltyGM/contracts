@@ -8,6 +8,9 @@ module loyalty_gm::utils {
 
     // ======== Public functions =========
 
+    /**
+        Converts a vector of u8 vectors to a vector of strings
+    */
     public fun to_string_vec(args: vector<vector<u8>>): vector<String> {
         let string_args = vector::empty<String>();
         vector::reverse(&mut args);

@@ -4,6 +4,10 @@
 # Module `0x0::loyalty_token`
 
 
+Loyalty Token module.
+This module contains the LoyaltyToken struct and its functions.
+Module for minting and managing LoyaltyTokens by users.
+
 
 -  [Resource `LoyaltyToken`](#0x0_loyalty_token_LoyaltyToken)
 -  [Struct `MintTokenEvent`](#0x0_loyalty_token_MintTokenEvent)
@@ -12,6 +16,7 @@
 -  [Function `mint`](#0x0_loyalty_token_mint)
 -  [Function `claim_xp`](#0x0_loyalty_token_claim_xp)
 -  [Function `claim_reward`](#0x0_loyalty_token_claim_reward)
+-  [Function `start_task`](#0x0_loyalty_token_start_task)
 -  [Function `update_token_stats`](#0x0_loyalty_token_update_token_stats)
 -  [Function `get_lvl_by_xp`](#0x0_loyalty_token_get_lvl_by_xp)
 -  [Function `get_xp_by_lvl`](#0x0_loyalty_token_get_xp_by_lvl)
@@ -37,7 +42,11 @@
 
 ## Resource `LoyaltyToken`
 
-Loyalty NFT.
+
+LoyaltyToken struct.
+This struct represents a LoyaltyToken.
+It contains the ID of the LoyaltySystem it belongs to, its name, description, url, level and XP.
+
 
 
 <pre><code><b>struct</b> <a href="loyalty_token.md#0x0_loyalty_token_LoyaltyToken">LoyaltyToken</a> <b>has</b> key
@@ -60,7 +69,7 @@ Loyalty NFT.
 <code><a href="loyalty_system.md#0x0_loyalty_system">loyalty_system</a>: <a href="_ID">object::ID</a></code>
 </dt>
 <dd>
-
+ ID of the LoyaltySystem which this token belongs to.
 </dd>
 <dt>
 <code>name: <a href="_String">string::String</a></code>
@@ -84,19 +93,19 @@ Loyalty NFT.
 <code>lvl: u64</code>
 </dt>
 <dd>
-
+ Current level of the token.
 </dd>
 <dt>
 <code>xp: u64</code>
 </dt>
 <dd>
-
+ Current XP of the token.
 </dd>
 <dt>
 <code>xp_to_next_lvl: u64</code>
 </dt>
 <dd>
-
+ XP needed to reach the next level.
 </dd>
 </dl>
 
@@ -242,6 +251,10 @@ Loyalty NFT.
 ## Function `mint`
 
 
+Mint a new LoyaltyToken for the given LoyaltySystem.
+The token is minted with the same name, description and url as the LoyaltySystem.
+
+
 
 <pre><code><b>public</b> entry <b>fun</b> <a href="loyalty_token.md#0x0_loyalty_token_mint">mint</a>(ls: &<b>mut</b> <a href="loyalty_system.md#0x0_loyalty_system_LoyaltySystem">loyalty_system::LoyaltySystem</a>, ctx: &<b>mut</b> <a href="_TxContext">tx_context::TxContext</a>)
 </code></pre>
@@ -291,6 +304,11 @@ Loyalty NFT.
 ## Function `claim_xp`
 
 
+Claim the XP earned by the given token.
+The token's level and XP to next level are updated accordingly.
+Aborts if the token has no XP to claim.
+
+
 
 <pre><code><b>public</b> entry <b>fun</b> <a href="loyalty_token.md#0x0_loyalty_token_claim_xp">claim_xp</a>(ls: &<b>mut</b> <a href="loyalty_system.md#0x0_loyalty_system_LoyaltySystem">loyalty_system::LoyaltySystem</a>, token: &<b>mut</b> <a href="loyalty_token.md#0x0_loyalty_token_LoyaltyToken">loyalty_token::LoyaltyToken</a>, ctx: &<b>mut</b> <a href="_TxContext">tx_context::TxContext</a>)
 </code></pre>
@@ -331,6 +349,10 @@ Loyalty NFT.
 ## Function `claim_reward`
 
 
+Claim the reward for the given token for the given level.
+Aborts if the token's level is lower than the reward's level.
+
+
 
 <pre><code><b>public</b> entry <b>fun</b> <a href="loyalty_token.md#0x0_loyalty_token_claim_reward">claim_reward</a>(ls: &<b>mut</b> <a href="loyalty_system.md#0x0_loyalty_system_LoyaltySystem">loyalty_system::LoyaltySystem</a>, token: &<a href="loyalty_token.md#0x0_loyalty_token_LoyaltyToken">loyalty_token::LoyaltyToken</a>, reward_lvl: u64, ctx: &<b>mut</b> <a href="_TxContext">tx_context::TxContext</a>)
 </code></pre>
@@ -356,9 +378,41 @@ Loyalty NFT.
 
 </details>
 
+<a name="0x0_loyalty_token_start_task"></a>
+
+## Function `start_task`
+
+
+This function is called by the user.
+User function to start task.
+Verifier cant finish task if user didnt start it.
+
+
+
+<pre><code><b>public</b> entry <b>fun</b> <a href="loyalty_token.md#0x0_loyalty_token_start_task">start_task</a>(<a href="loyalty_system.md#0x0_loyalty_system">loyalty_system</a>: &<b>mut</b> <a href="loyalty_system.md#0x0_loyalty_system_LoyaltySystem">loyalty_system::LoyaltySystem</a>, task_id: <a href="_ID">object::ID</a>, ctx: &<b>mut</b> <a href="_TxContext">tx_context::TxContext</a>)
+</code></pre>
+
+
+
+<details>
+<summary>Implementation</summary>
+
+
+<pre><code><b>public</b> entry <b>fun</b> <a href="loyalty_token.md#0x0_loyalty_token_start_task">start_task</a>(<a href="loyalty_system.md#0x0_loyalty_system">loyalty_system</a>: &<b>mut</b> LoyaltySystem, task_id: ID, ctx: &<b>mut</b> TxContext) {
+    <a href="user_store.md#0x0_user_store_start_task">user_store::start_task</a>(<a href="loyalty_system.md#0x0_loyalty_system_get_mut_user_store">loyalty_system::get_mut_user_store</a>(<a href="loyalty_system.md#0x0_loyalty_system">loyalty_system</a>), task_id, <a href="_sender">tx_context::sender</a>(ctx))
+}
+</code></pre>
+
+
+
+</details>
+
 <a name="0x0_loyalty_token_update_token_stats"></a>
 
 ## Function `update_token_stats`
+
+
+Update the token's level and XP based on the given XP to add.
 
 
 
@@ -396,6 +450,9 @@ Loyalty NFT.
 ## Function `get_lvl_by_xp`
 
 
+Get the level of the token based on its XP.
+
+
 
 <pre><code><b>fun</b> <a href="loyalty_token.md#0x0_loyalty_token_get_lvl_by_xp">get_lvl_by_xp</a>(xp: u64): u64
 </code></pre>
@@ -420,6 +477,9 @@ Loyalty NFT.
 ## Function `get_xp_by_lvl`
 
 
+Get the XP needed to reach the given level.
+
+
 
 <pre><code><b>fun</b> <a href="loyalty_token.md#0x0_loyalty_token_get_xp_by_lvl">get_xp_by_lvl</a>(lvl: u64): u64
 </code></pre>
@@ -442,6 +502,9 @@ Loyalty NFT.
 <a name="0x0_loyalty_token_get_xp_to_next_lvl"></a>
 
 ## Function `get_xp_to_next_lvl`
+
+
+Get the XP needed to reach the next level by current level and XP.
 
 
 
