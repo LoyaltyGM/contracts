@@ -10,6 +10,7 @@ module loyalty_gm::task_store {
     use sui::object::{Self, ID};
     use sui::vec_map::{Self, VecMap};
     use sui::tx_context::{TxContext};
+    use sui::event::{emit};
 
 
     use loyalty_gm::utils::{Self};
@@ -35,6 +36,15 @@ module loyalty_gm::task_store {
         module_name: String,
         function_name: String,
         arguments: vector<String>,
+    }
+
+    // ======== Events =========
+
+    struct CreateTaskEvent has copy, drop {
+        /// Object ID of the Task
+        task_id: ID,
+        /// Name of the Task
+        name: string::String,
     }
 
     // ======== Public functions =========
@@ -72,6 +82,12 @@ module loyalty_gm::task_store {
             function_name: string::utf8(function_name),
             arguments: utils::to_string_vec(arguments),
         };
+
+        emit(CreateTaskEvent {
+            task_id: id,
+            name: task.name,
+        });
+        
         vec_map::insert(store, id, task);
     }
 
