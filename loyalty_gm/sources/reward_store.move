@@ -7,7 +7,7 @@ module loyalty_gm::reward_store {
 
     use std::string::{Self, String};
 
-    use sui::object::{Self, UID};
+    use sui::object::{Self, UID, ID};
     use sui::tx_context::{Self, TxContext};
     use sui::vec_map::{Self, VecMap};
     use sui::transfer;
@@ -17,6 +17,7 @@ module loyalty_gm::reward_store {
     use sui::table::{Self};
     use sui::dynamic_object_field as dof;
     use sui::balance::{Self, Balance};
+    use sui::event::{emit};
 
     // ======== Constants =========
 
@@ -42,6 +43,18 @@ module loyalty_gm::reward_store {
         reward_per_user: u64,
     }
 
+    // ======== Events =========
+
+    struct CreateRewardEvent has copy, drop {
+        /// Object ID of the Reward
+        reward_id: ID,
+        /// Lvl of the Reward
+        lvl: u64,
+        /// Description of the Reward
+        description: string::String,
+    }
+
+
     // ======== Public functions =========
 
     public(friend) fun empty(): VecMap<u64, Reward> {  
@@ -61,7 +74,7 @@ module loyalty_gm::reward_store {
         let balance_val = balance::value(&balance); 
         assert!(balance_val % reward_supply == 0, EInvalidSupply);
 
-        let reward_info = Reward {
+        let reward = Reward {
             id: object::new(ctx),
             level, 
             url: url::new_unsafe_from_bytes(url),
@@ -71,8 +84,14 @@ module loyalty_gm::reward_store {
             reward_per_user: balance_val / reward_supply,
         };
 
-        dof::add(&mut reward_info.id, REWARD_RECIPIENTS_KEY, table::new<address, bool>(ctx));
-        vec_map::insert(store, level, reward_info);
+        emit(CreateRewardEvent {
+            reward_id: object::id(&reward),
+            lvl: reward.level,
+            description: reward.description,
+        });
+
+        dof::add(&mut reward.id, REWARD_RECIPIENTS_KEY, table::new<address, bool>(ctx));
+        vec_map::insert(store, level, reward);
     }
 
     public(friend) fun remove_reward(store: &mut VecMap<u64, Reward>, level: u64, ctx: &mut TxContext) {
@@ -105,6 +124,7 @@ module loyalty_gm::reward_store {
     }
 
     // ======== Private functions =========
+
     fun set_reward_claimed(reward: &mut Reward, ctx: &mut TxContext) {
         table::add<address, bool>(
             dof::borrow_mut(&mut reward.id, REWARD_RECIPIENTS_KEY), 
