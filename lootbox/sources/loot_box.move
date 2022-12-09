@@ -106,7 +106,7 @@ module lootbox::loot_box {
             creator: tx_context::sender(ctx),
             box_max_supply: 1000,
             box_url: url::new_unsafe_from_bytes(BOX_URL),
-            box_price: 10000000,
+            box_price: 10_000_000, // 0.01
             rarity_types: rarity_types,
             rarity_weights: rarity_weights,
             _box_minted: 0,
