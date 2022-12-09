@@ -107,7 +107,7 @@ module loyalty_gm::system_tests {
     }
 
     #[test]
-    #[expected_failure(abort_code = 0)]
+    #[expected_failure(abort_code = loyalty_gm::loyalty_system::EAdminOnly)]
     fun check_admin_cap_test() {
         let scenario_val = create_loyalty_system_test();
         let scenario = &mut scenario_val;

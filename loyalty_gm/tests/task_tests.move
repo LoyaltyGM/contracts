@@ -77,7 +77,7 @@ module loyalty_gm::task_tests {
     }
 
     #[test]
-    #[expected_failure(abort_code = 0)]
+    #[expected_failure(abort_code = loyalty_gm::user_store::ETaskAlreadyDone)]
     public fun fail_start_task_twice_test() {
         let (scenario_val, task_id) = add_task_test();
         let scenario = &mut scenario_val;
@@ -95,7 +95,7 @@ module loyalty_gm::task_tests {
     }
 
     #[test]
-    #[expected_failure(abort_code = 0)]
+    #[expected_failure(abort_code = loyalty_gm::user_store::ETaskAlreadyDone)]
     public fun fail_finish_task_twice_test() {
         let (scenario_val, task_id) = add_task_test();
         let scenario = &mut scenario_val;
@@ -111,8 +111,8 @@ module loyalty_gm::task_tests {
         test_scenario::end(scenario_val);
     }
 
-     #[test]
-    #[expected_failure(abort_code = 1)]
+    #[test]
+    #[expected_failure(abort_code = loyalty_gm::user_store::ETaskNotStarted)]
     public fun fail_finish_not_started_task_test() {
         let (scenario_val, task_id) = add_task_test();
         let scenario = &mut scenario_val;

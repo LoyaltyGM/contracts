@@ -54,7 +54,7 @@ module loyalty_gm::token_tests {
     }
 
     #[test]
-    #[expected_failure(abort_code = 0)]
+    #[expected_failure(abort_code = sui::dynamic_field::EFieldAlreadyExists)]
     fun mint_test_fail() {
         let scenario_val = create_loyalty_system_test();
         let scenario = &mut scenario_val;
@@ -78,14 +78,12 @@ module loyalty_gm::token_tests {
             assert!(loyalty_token::get_xp(&token) == get_TASK_REWARD(), Error);
             test_scenario::return_to_sender(scenario, token);
         };
-
-        
         
         scenario_val
     }
 
     #[test]
-    #[expected_failure(abort_code = 0)]
+    #[expected_failure(abort_code = loyalty_gm::loyalty_token::ENoClaimableXp)]
     fun fail_claim_xp_test() {
         let scenario_val = mint_test();
         let scenario = &mut scenario_val;

@@ -338,7 +338,7 @@ module loyalty_gm::test_utils {
         {
             let ls = test_scenario::take_shared<LoyaltySystem>(scenario);
 
-            loyalty_system::start_task(
+            loyalty_token::start_task(
                 &mut ls,
                 task_id,
                 test_scenario::ctx(scenario)

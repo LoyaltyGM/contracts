@@ -63,7 +63,7 @@ module loyalty_gm::reward_tests {
     }
 
     #[test]
-    #[expected_failure(abort_code = 0)]
+    #[expected_failure(abort_code = loyalty_gm::reward_store::EInvalidSupply)]
     fun fail_add_reward_test() {
         let scenario_val = create_loyalty_system_test();
         let scenario = &mut scenario_val;
@@ -113,7 +113,7 @@ module loyalty_gm::reward_tests {
     }
 
     #[test]
-    #[expected_failure(abort_code = 2)]
+    #[expected_failure(abort_code = loyalty_gm::reward_store::EAlreadyClaimed)]
     fun fail_claim_reward_twice_test() {
         let scenario_val = claim_xp_test();
         let scenario = &mut scenario_val;
@@ -126,7 +126,7 @@ module loyalty_gm::reward_tests {
     }
 
     #[test]
-    #[expected_failure(abort_code = 1)]
+    #[expected_failure(abort_code = loyalty_gm::reward_store::ERewardPoolExceeded)]
     fun fail_claim_exceeded_reward_test() {
         let (scenario_val, task_id) = add_task_test();
         let scenario = &mut scenario_val;
@@ -151,7 +151,7 @@ module loyalty_gm::reward_tests {
     }
 
     #[test]
-    #[expected_failure(abort_code = 1)]
+    #[expected_failure(abort_code = loyalty_gm::loyalty_token::EInvalidLvl)]
     fun fail_claim_reward_test() {
         let (scenario_val, task_id) = add_task_test();
         let scenario = &mut scenario_val;
