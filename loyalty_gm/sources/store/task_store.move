@@ -8,14 +8,12 @@ module loyalty_gm::task_store {
     friend loyalty_gm::loyalty_token;
 
     use std::string::{Self, String};
+    use std::vector::{Self};
 
     use sui::object::{Self, ID};
     use sui::vec_map::{Self, VecMap};
     use sui::tx_context::{TxContext};
     use sui::event::{emit};
-
-
-    use loyalty_gm::utils::{Self};
 
     // ======== Constants =========
 
@@ -102,7 +100,7 @@ module loyalty_gm::task_store {
             package_id,
             module_name: string::utf8(module_name),
             function_name: string::utf8(function_name),
-            arguments: utils::to_string_vec(arguments),
+            arguments: to_string_vec(arguments),
         };
 
         emit(CreateTaskEvent {
@@ -125,5 +123,19 @@ module loyalty_gm::task_store {
     */
     public fun get_task_reward(store: &VecMap<ID, Task>, task_id: &ID): u64 {
        vec_map::get(store, task_id).reward_exp
+    }
+
+    // ======= Private and Utility functions =======
+    
+    /// Converts a vector of vectors of u8 to a vector of strings
+    fun to_string_vec(args: vector<vector<u8>>): vector<String> {
+        let string_args = vector::empty<String>();
+        vector::reverse(&mut args);
+
+        while(!vector::is_empty(&args)) {
+            vector::push_back(&mut string_args, string::utf8(vector::pop_back(&mut args)))
+        };
+
+        string_args
     }
 }

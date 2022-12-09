@@ -310,11 +310,13 @@ module loyalty_gm::loyalty_system {
     }
 
     // ======= Public functions: View
-
+    /**
+        Get the name of the loyalty system.     
+    */
     public fun get_name(loyalty_system: &LoyaltySystem): &string::String {
         &loyalty_system.name
-    }
-
+    }    
+    
     public fun get_max_supply(loyalty_system: &LoyaltySystem): u64 {
         loyalty_system.max_supply 
     }

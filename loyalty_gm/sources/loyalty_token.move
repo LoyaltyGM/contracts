@@ -1,7 +1,7 @@
 /**
     Loyalty Token module.
-    This module contains the LoyaltyToken struct and its functions.
-    Module for minting and managing LoyaltyTokens by users.
+    This module contains the Loyalty NFT struct and its functions.
+    Module for minting and managing Loyalty NFT by users.
 */
 module loyalty_gm::loyalty_token {
     use std::string::{Self, String};
@@ -29,6 +29,7 @@ module loyalty_gm::loyalty_token {
     const EInvalidLvl: u64 = 1;
 
     // ======== Structs =========
+    
 
     /**
         LoyaltyToken struct.
