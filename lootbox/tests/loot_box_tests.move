@@ -6,8 +6,8 @@ module lootbox::loot_box_tests {
     use sui::test_scenario::{Self, Scenario};
     use std::string;
     use std::debug;
-    use sui::sui::SUI;
-    use sui::coin;
+    // use sui::sui::SUI;
+    // use sui::coin;
 
      // So these are our heroes.
     const OWNER: address = @0x0;
@@ -30,22 +30,26 @@ module lootbox::loot_box_tests {
         };
     }
 
-    fun buy_one_lootbox(scenario: &mut Scenario, token_paid: u64) {
+    fun buy_one_lootbox(scenario: &mut Scenario, _: u64) {
         // buy one box 
         test_scenario::next_tx(scenario, MINTER_1);
         {
            // get struct BoxCollection
-           let lootbox_val = test_scenario::take_shared<loot_box::BoxCollection>(scenario);
-           let lootbox = &mut lootbox_val;
-           let sui = coin::mint_for_testing<SUI>(token_paid, test_scenario::ctx(scenario));
-           loot_box::buy_box(lootbox, sui, test_scenario::ctx(scenario));
-           assert!(loot_box::get_box_minted(lootbox) == 1, 1);
-           // !!! need to return called structure
-           test_scenario::return_shared(lootbox_val);
+            let lootbox_val = test_scenario::take_shared<loot_box::BoxCollection>(scenario);
+            let lootbox = &mut lootbox_val;
+            // let sui = coin::mint_for_testing<SUI>(token_paid, test_scenario::ctx(scenario));
+            loot_box::buy_box(
+                lootbox, 
+                // sui, 
+                test_scenario::ctx(scenario)
+            );
+            assert!(loot_box::get_box_minted(lootbox) == 1, 1);
+            // !!! need to return called structure
+            test_scenario::return_shared(lootbox_val);
         };
     }
 
-    fun buy_multiple_times(scenario: &mut Scenario, token_paid: u64, number_of_buy_boxes: u64) {
+    fun buy_multiple_times(scenario: &mut Scenario, _: u64, number_of_buy_boxes: u64) {
         // buy one box 
         test_scenario::next_tx(scenario, MINTER_1);
         {
@@ -54,9 +58,13 @@ module lootbox::loot_box_tests {
            let lootbox = &mut lootbox_val;
            let i = 0;
            while (i < number_of_buy_boxes) {
-              let sui = coin::mint_for_testing<SUI>(token_paid, test_scenario::ctx(scenario));
-              loot_box::buy_box(lootbox, sui, test_scenario::ctx(scenario));
-              i = i + 1;
+                // let sui = coin::mint_for_testing<SUI>(token_paid, test_scenario::ctx(scenario));
+                loot_box::buy_box(
+                    lootbox, 
+                    // sui, 
+                    test_scenario::ctx(scenario)
+                );
+                i = i + 1;
            };
            assert!(loot_box::get_box_minted(lootbox) == number_of_buy_boxes, 1);
            // !!! need to return called structure
@@ -114,18 +122,18 @@ module lootbox::loot_box_tests {
     //     test_scenario::end(scenario_val);
     // }
 
-    #[test]
-    #[expected_failure(abort_code = 0)]
-    fun error_not_enough_money() {
-        let scenario_val = test_scenario::begin(OWNER);
-        let scenario = &mut scenario_val;
-        create_collection(scenario, MAX_SUPPLY);
-        buy_one_lootbox(scenario, LESS_COINS_TO_BUY_BOX);
-        test_scenario::end(scenario_val);
-    }
+    // #[test]
+    // #[expected_failure(abort_code = lootbox::loot_box::EAmountIncorrect)]
+    // fun error_not_enough_money() {
+    //     let scenario_val = test_scenario::begin(OWNER);
+    //     let scenario = &mut scenario_val;
+    //     create_collection(scenario, MAX_SUPPLY);
+    //     buy_one_lootbox(scenario, LESS_COINS_TO_BUY_BOX);
+    //     test_scenario::end(scenario_val);
+    // }
 
     #[test]
-    #[expected_failure(abort_code = 1)]
+    #[expected_failure(abort_code = lootbox::loot_box::EMaxSupplyReaced)]
     fun error_max_supply_is_over() {
         let scenario_val = test_scenario::begin(OWNER);
         let scenario = &mut scenario_val;
@@ -135,7 +143,7 @@ module lootbox::loot_box_tests {
     }
 
     #[test]
-    #[expected_failure(abort_code = 2)]
+    #[expected_failure(abort_code = lootbox::loot_box::EMaxMintedPerAddress)]
     fun error_per_max_minted_per_address() {
         let scenario_val = test_scenario::begin(OWNER);
         let scenario = &mut scenario_val;

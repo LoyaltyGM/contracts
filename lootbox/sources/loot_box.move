@@ -9,8 +9,8 @@ module lootbox::loot_box {
     use sui::transfer;
     use sui::tx_context::{Self, TxContext};
     use sui::url::{Self, Url};
-    use sui::sui::SUI;
-    use sui::coin::{Self, Coin};
+    // use sui::sui::SUI;
+    // use sui::coin::{Self, Coin};
     use lootbox::store::{Self};
     use sui::dynamic_object_field as dof;
     use sui::table::{Self};
@@ -44,7 +44,6 @@ module lootbox::loot_box {
         box_id: ID,
         loot_id: ID,
         opener: address,
-
     }
     
     // ======== Structs =========
@@ -145,7 +144,7 @@ module lootbox::loot_box {
     // SETTER
     public entry fun buy_box(
         collection: &mut BoxCollection,
-        paid: Coin<SUI>, 
+        // paid: Coin<SUI>, 
         ctx: &mut TxContext
     ) {
 
@@ -154,7 +153,7 @@ module lootbox::loot_box {
         
         let table = dof::borrow_mut(&mut collection.id, COUNTER_KEY);
         assert!(n < collection.box_max_supply, EMaxSupplyReaced);
-        assert!(collection.box_price == coin::value(&paid), EAmountIncorrect);
+        // assert!(collection.box_price == coin::value(&paid), EAmountIncorrect);
         let isUserExist = store::user_exists(table, sender);
         // check to how many times user minted
         if(isUserExist) {
@@ -183,7 +182,7 @@ module lootbox::loot_box {
         };
 
         transfer::transfer(box, sender);
-        transfer::transfer(paid, collection.creator);
+        // transfer::transfer(paid, collection.creator);
     }
 
     public entry fun open_box(collection: &mut BoxCollection, box: LootBox, ctx: &mut TxContext) {
