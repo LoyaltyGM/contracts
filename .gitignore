@@ -4,3 +4,4 @@ referal_system/build/*
 nft_reveal/build/*
 *sui.log*
 .DS_Store
+.idea

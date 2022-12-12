@@ -44,7 +44,7 @@ module loyalty_gm::loyalty_token {
 
     struct MintTokenEvent has copy, drop {
         object_id: ID,
-        loyalty_system:ID,
+        loyalty_system: ID,
         minter: address,
         name: string::String,
     }
@@ -88,9 +88,9 @@ module loyalty_gm::loyalty_token {
         transfer::transfer(nft, sender);
     }
 
-    public entry fun claim_exp (
+    public entry fun claim_exp(
         ls: &mut LoyaltySystem,
-        token: &mut LoyaltyToken, 
+        token: &mut LoyaltyToken,
         ctx: &mut TxContext
     ) {
         let user_store = loyalty_system::get_mut_user_store(ls);

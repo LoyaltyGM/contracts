@@ -23,19 +23,19 @@ module loyalty_gm::user_store {
 
     // ======== Public functions =========
 
-    public(friend) fun create_store(ctx: &mut TxContext): Table<address, UserData> {  
+    public(friend) fun create_store(ctx: &mut TxContext): Table<address, UserData> {
         table::new<address, UserData>(ctx)
     }
 
     public(friend) fun add_new_data(
-        store: &mut Table<address, UserData>, 
+        store: &mut Table<address, UserData>,
         token_id: ID,
         ctx: &mut TxContext
     ) {
         let sender = tx_context::sender(ctx);
         let data = UserData {
             id: object::new(ctx),
-            token_id: token_id,
+            token_id,
             owner: sender,
             claimable_exp: INITIAL_EXP,
         };
