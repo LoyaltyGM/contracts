@@ -131,7 +131,7 @@ module loyalty_gm::loyalty_system {
 
         let creator = tx_context::sender(ctx);
 
-        let loyalty_system = LoyaltySystem { 
+        let loyalty_system = LoyaltySystem {
             id: object::new(ctx),
             name: string::utf8(name),
             description: string::utf8(description),
@@ -150,9 +150,9 @@ module loyalty_gm::loyalty_system {
             creator,
             name: loyalty_system.name,
         });
-        
-        transfer::transfer(AdminCap { 
-            id: object::new(ctx), 
+
+        transfer::transfer(AdminCap {
+            id: object::new(ctx),
             loyalty_system: object::uid_to_inner(&loyalty_system.id),
         }, creator);
 
@@ -329,7 +329,7 @@ module loyalty_gm::loyalty_system {
         &loyalty_system.description
     }
 
-    public fun get_url(loyalty_system: &LoyaltySystem): &Url{
+    public fun get_url(loyalty_system: &LoyaltySystem): &Url {
         &loyalty_system.url
     }
 
