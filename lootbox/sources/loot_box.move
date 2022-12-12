@@ -18,8 +18,11 @@ module lootbox::loot_box {
     // ======== Constants =========
     const LOW_RANGE: u64 = 1;
     const HIGH_RANGE: u64 = 100;
-    const BOX_URL: vector<u8> = b"ipfs://QmZVAXP7B7ZukhCDR5uSivmagkY53QtGZnvPRgZtEjfZrv";
-    const LOOT_URL: vector<u8> =  b"ipfs://QmVGYBzXTVzZFhJjtsd8bwBNJZ5drWwFF9XwsQJHFdbTkL";
+    const BOX_URL: vector<u8> = b"ipfs://QmNiA4JEN5HcZymzvvM2YiEQcvQSJ2V1jPeqQBXwpf1cSc";
+    const LOOT_BRONZE_URL: vector<u8> =  b"ipfs://QmVGYBzXTVzZFhJjtsd8bwBNJZ5drWwFF9XwsQJHFdbTkL";
+    const LOOT_SILVER_URL: vector<u8> =  b"ipfs://QmVGYBzXTVzZFhJjtsd8bwBNJZ5drWwFF9XwsQJHFdbTkL";
+    const LOOT_GOLD_URL: vector<u8> =  b"ipfs://QmVGYBzXTVzZFhJjtsd8bwBNJZ5drWwFF9XwsQJHFdbTkL";
+    const LOOT_ERROR_URL: vector<u8> = b"ipfs://QmemsQrJ1prk3E4kf24A7G1SexwvhbASaejJ3LcWvwgZBK";
     
     // Max minted per address
     const MAX_MINTED_PER_ADDRESS: u64 = 3;
@@ -212,8 +215,23 @@ module lootbox::loot_box {
             name: string::utf8(b"LOOT"),
             rarity: rarity,
             score: score,
-            url: url::new_unsafe_from_bytes(LOOT_URL)
+            url: get_loot_rarity_url(rarity),
         }
+    }
+
+    // set up image url for each rarity
+    fun get_loot_rarity_url(rarity: String): Url {
+        let rarity_url: Url;
+        if (rarity == string::utf8(b"Bronze")) {
+            rarity_url = url::new_unsafe_from_bytes(LOOT_BRONZE_URL);
+        } else if (rarity == string::utf8(b"Silver")) {
+            rarity_url = url::new_unsafe_from_bytes(LOOT_SILVER_URL);
+        } else if (rarity == string::utf8(b"Gold")) {
+            rarity_url = url::new_unsafe_from_bytes(LOOT_GOLD_URL);
+        } else {
+            rarity_url = url::new_unsafe_from_bytes(LOOT_ERROR_URL);
+        };
+        rarity_url
     }
 
     fun get_loot_score(ctx: &mut TxContext): u64 {
