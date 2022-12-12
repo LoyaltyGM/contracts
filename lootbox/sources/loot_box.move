@@ -18,11 +18,11 @@ module lootbox::loot_box {
     // ======== Constants =========
     const LOW_RANGE: u64 = 1;
     const HIGH_RANGE: u64 = 100;
-    const BOX_URL: vector<u8> = b"ipfs://QmNiA4JEN5HcZymzvvM2YiEQcvQSJ2V1jPeqQBXwpf1cSc";
-    const LOOT_BRONZE_URL: vector<u8> =  b"ipfs://QmVGYBzXTVzZFhJjtsd8bwBNJZ5drWwFF9XwsQJHFdbTkL";
-    const LOOT_SILVER_URL: vector<u8> =  b"ipfs://QmVGYBzXTVzZFhJjtsd8bwBNJZ5drWwFF9XwsQJHFdbTkL";
-    const LOOT_GOLD_URL: vector<u8> =  b"ipfs://QmVGYBzXTVzZFhJjtsd8bwBNJZ5drWwFF9XwsQJHFdbTkL";
-    const LOOT_ERROR_URL: vector<u8> = b"ipfs://QmemsQrJ1prk3E4kf24A7G1SexwvhbASaejJ3LcWvwgZBK";
+    const BOX_URL: vector<u8> = b"ipfs://QmWWMmooPsSjbnryqDTPCgbBz2RPbeW3yaDxkfo1qKT4Vq";
+    const LOOT_BRONZE_URL: vector<u8> =  b"ipfs://QmaVKQT73AKuU86K6h5BzZXegCMbepE7AnF4uuXhqQ7XtR";
+    const LOOT_SILVER_URL: vector<u8> =  b"ipfs://QmYuSJmWfCaTBxxZ5icESC5Bz5RkjyfwtFjLy4CfQBHKCQ";
+    const LOOT_GOLD_URL: vector<u8> =  b"ipfs://QmRTxSnERk8RrdoPhZWL5qRJwVxyc1t9aGYSwqgyS8HY7Z";
+    const LOOT_ERROR_URL: vector<u8> = b"ipfs://Qmcauq8xfXeeCQuTBYsWjWpwY7LwLbrvvunkKGEugDmiJx";
     
     // Max minted per address
     const MAX_MINTED_PER_ADDRESS: u64 = 3;
