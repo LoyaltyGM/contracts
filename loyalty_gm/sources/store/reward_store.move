@@ -67,7 +67,7 @@ module loyalty_gm::reward_store {
         Creates a new Reward Store.
         It represents a map of rewards, where the key is the level of the reward.
     */
-    public(friend) fun empty(): VecMap<u64, Reward> {  
+    public(friend) fun empty(): VecMap<u64, Reward> {
         vec_map::empty<u64, Reward>()
     }
 
@@ -78,7 +78,7 @@ module loyalty_gm::reward_store {
     */
     public(friend) fun add_reward(
         store: &mut VecMap<u64, Reward>,
-        level: u64, 
+        level: u64,
         url: vector<u8>,
         description: vector<u8>,
         reward_pool: Coin<SUI>,
@@ -86,12 +86,12 @@ module loyalty_gm::reward_store {
         ctx: &mut TxContext
     ) {
         let balance = coin::into_balance(reward_pool);
-        let balance_val = balance::value(&balance); 
+        let balance_val = balance::value(&balance);
         assert!(balance_val % reward_supply == 0, EInvalidSupply);
 
         let reward = Reward {
             id: object::new(ctx),
-            level, 
+            level,
             url: url::new_unsafe_from_bytes(url),
             description: string::utf8(description),
             reward_pool: balance,
@@ -114,15 +114,15 @@ module loyalty_gm::reward_store {
         It removes the reward from the store and transfers the reward pool to the sender.
     */
     public(friend) fun remove_reward(store: &mut VecMap<u64, Reward>, level: u64, ctx: &mut TxContext) {
-        let (_, reward) =  vec_map::remove(store, &level);
+        let (_, reward) = vec_map::remove(store, &level);
 
         let sui_amt = balance::value(&reward.reward_pool);
         transfer::transfer(
-            coin::take(&mut reward.reward_pool, sui_amt, ctx), 
+            coin::take(&mut reward.reward_pool, sui_amt, ctx),
             tx_context::sender(ctx)
-        ); 
+        );
 
-        delete_reward(reward); 
+        delete_reward(reward);
     }
 
     /**
@@ -143,9 +143,9 @@ module loyalty_gm::reward_store {
         set_reward_claimed(reward, ctx);
 
         transfer::transfer(
-            coin::take(&mut reward.reward_pool, reward.reward_per_user, ctx), 
+            coin::take(&mut reward.reward_pool, reward.reward_per_user, ctx),
             tx_context::sender(ctx)
-        ); 
+        );
     }
 
     // ======== Private functions =========
@@ -156,7 +156,7 @@ module loyalty_gm::reward_store {
     */
     fun set_reward_claimed(reward: &mut Reward, ctx: &mut TxContext) {
         table::add<address, bool>(
-            dof::borrow_mut(&mut reward.id, REWARD_RECIPIENTS_KEY), 
+            dof::borrow_mut(&mut reward.id, REWARD_RECIPIENTS_KEY),
             tx_context::sender(ctx),
             true
         );
@@ -168,9 +168,9 @@ module loyalty_gm::reward_store {
     fun check_claimed(reward: &Reward, ctx: &mut TxContext) {
         assert!(
             !table::contains<address, bool>(
-                dof::borrow(&reward.id, REWARD_RECIPIENTS_KEY), 
+                dof::borrow(&reward.id, REWARD_RECIPIENTS_KEY),
                 tx_context::sender(ctx)
-            ), 
+            ),
             EAlreadyClaimed
         );
     }
@@ -181,13 +181,13 @@ module loyalty_gm::reward_store {
     */
     fun delete_reward(reward: Reward) {
         let Reward {
-            id, 
-            description:_, 
-            level:_, 
-            url:_, 
-            reward_pool, 
-            reward_supply:_,
-            reward_per_user:_,
+            id,
+            description: _,
+            level: _,
+            url: _,
+            reward_pool,
+            reward_supply: _,
+            reward_per_user: _,
         } = reward;
         balance::destroy_zero(reward_pool);
         object::delete(id);

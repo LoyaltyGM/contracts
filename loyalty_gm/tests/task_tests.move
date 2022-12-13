@@ -8,18 +8,18 @@ module loyalty_gm::task_tests {
 
     use loyalty_gm::loyalty_system::{Self, LoyaltySystem};
     use loyalty_gm::system_tests::{
-        create_loyalty_system_test, 
+    create_loyalty_system_test,
     };
     use loyalty_gm::test_utils::{
-        get_ADMIN,
-        get_USER_1,
-        get_TASK_REWARD,
-        add_task,
-        get_verifier,
-        mint_token,
-        start_task,
-        finish_task,
-        remove_task,
+    get_ADMIN,
+    get_USER_1,
+    get_TASK_REWARD,
+    add_task,
+    get_verifier,
+    mint_token,
+    start_task,
+    finish_task,
+    remove_task,
     };
 
     // ======== Errors =========
@@ -41,7 +41,7 @@ module loyalty_gm::task_tests {
             let ls = test_scenario::take_shared<LoyaltySystem>(scenario);
 
             assert!(vec_map::size(loyalty_system::get_tasks(&ls)) == 1, Error);
-            let (id, _)= vec_map::get_entry_by_idx(loyalty_system::get_tasks(&ls), 0);
+            let (id, _) = vec_map::get_entry_by_idx(loyalty_system::get_tasks(&ls), 0);
             // print(loyalty_system::get_tasks(&ls));
             task_id = *id;
             print(id);
@@ -68,7 +68,7 @@ module loyalty_gm::task_tests {
         {
             let ls = test_scenario::take_shared<LoyaltySystem>(scenario);
 
-            assert!(loyalty_system::get_claimable_xp_test(&ls, get_USER_1())== get_TASK_REWARD(), Error);
+            assert!(loyalty_system::get_claimable_xp_test(&ls, get_USER_1()) == get_TASK_REWARD(), Error);
 
             test_scenario::return_shared(ls);
         };
@@ -107,7 +107,7 @@ module loyalty_gm::task_tests {
 
         finish_task(scenario, get_USER_1(), task_id);
         finish_task(scenario, get_USER_1(), task_id);
-        
+
         test_scenario::end(scenario_val);
     }
 
@@ -121,7 +121,7 @@ module loyalty_gm::task_tests {
         mint_token(scenario, get_USER_1());
 
         finish_task(scenario, get_USER_1(), task_id);
-        
+
         test_scenario::end(scenario_val);
     }
 

@@ -20,7 +20,7 @@ module loyalty_gm::system_tests {
     // use loyalty_gm::user_store::{Self, User};
     // use loyalty_gm::reward_store::{Self, Reward};
     // use loyalty_gm::task_store::{Self, Task};
-    
+
     // =================
     use std::string::{Self};
 
@@ -31,16 +31,16 @@ module loyalty_gm::system_tests {
     use loyalty_gm::loyalty_system::{Self, LoyaltySystem, AdminCap};
     use loyalty_gm::system_store::{Self, SystemStore, SYSTEM_STORE};
     use loyalty_gm::test_utils::{
-        get_ADMIN,
-        get_USER_1,
-        get_LS_NAME,
-        get_LS_DESCRIPTION,
-        get_LS_URL,
-        get_LS_MAX_SUPPLY,
-        get_LS_MAX_LVL,
-        mint_sui, 
-        create_system_store, 
-        create_loyalty_system,
+    get_ADMIN,
+    get_USER_1,
+    get_LS_NAME,
+    get_LS_DESCRIPTION,
+    get_LS_URL,
+    get_LS_MAX_SUPPLY,
+    get_LS_MAX_LVL,
+    mint_sui,
+    create_system_store,
+    create_loyalty_system,
     };
 
     // ======== Errors =========
@@ -48,7 +48,7 @@ module loyalty_gm::system_tests {
     const Error: u64 = 1;
 
     // ======== Tests =========
-    
+
     #[test]
     public fun create_loyalty_system_test(): Scenario {
         let scenario_val = test_scenario::begin(get_ADMIN());
@@ -61,7 +61,7 @@ module loyalty_gm::system_tests {
         test_scenario::next_tx(scenario, get_ADMIN());
         {
             let ls = test_scenario::take_shared<LoyaltySystem>(scenario);
-            
+
             assert!(*loyalty_system::get_name(&ls) == string::utf8(get_LS_NAME()), Error);
             assert!(*loyalty_system::get_description(&ls) == string::utf8(get_LS_DESCRIPTION()), Error);
             assert!(*loyalty_system::get_url(&ls) == url::new_unsafe_from_bytes(get_LS_URL()), Error);
@@ -69,11 +69,11 @@ module loyalty_gm::system_tests {
             assert!(loyalty_system::get_max_lvl(&ls) == get_LS_MAX_LVL(), Error);
 
             let store = test_scenario::take_shared<SystemStore<SYSTEM_STORE>>(scenario);
-            
+
             assert!(system_store::contains(&store, object::id(&ls)), Error);
             assert!(system_store::borrow(&store, 0) == object::id(&ls), Error);
             assert!(system_store::length(&store) == 1, Error);
-            
+
             test_scenario::return_shared(ls);
             test_scenario::return_shared(store);
         };
@@ -88,7 +88,7 @@ module loyalty_gm::system_tests {
         let scenario = &mut scenario_val;
 
         test_scenario::next_tx(scenario, get_ADMIN());
-        { 
+        {
             let ls = test_scenario::take_shared<LoyaltySystem>(scenario);
             let admin_cap = test_scenario::take_from_sender<AdminCap>(scenario);
 
@@ -102,7 +102,7 @@ module loyalty_gm::system_tests {
             test_scenario::return_shared(ls);
             test_scenario::return_to_sender(scenario, admin_cap);
         };
-        
+
         test_scenario::end(scenario_val);
     }
 
@@ -115,7 +115,7 @@ module loyalty_gm::system_tests {
         create_loyalty_system(scenario, get_USER_1());
 
         test_scenario::next_tx(scenario, get_ADMIN());
-        { 
+        {
             let ls = test_scenario::take_shared<LoyaltySystem>(scenario);
             let admin_cap = test_scenario::take_from_sender<AdminCap>(scenario);
 
@@ -127,7 +127,7 @@ module loyalty_gm::system_tests {
             test_scenario::return_shared(ls);
             test_scenario::return_to_sender(scenario, admin_cap);
         };
-        
+
         test_scenario::end(scenario_val);
     }
 }

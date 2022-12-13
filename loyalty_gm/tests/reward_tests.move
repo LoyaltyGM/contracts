@@ -9,31 +9,31 @@ module loyalty_gm::reward_tests {
 
     use loyalty_gm::loyalty_system::{Self, LoyaltySystem};
     use loyalty_gm::system_tests::{
-        create_loyalty_system_test, 
+    create_loyalty_system_test,
     };
     use loyalty_gm::test_utils::{
-        get_ADMIN,
-        add_reward,
-        remove_reward,
-        get_USER_1,
-        get_REWARD_LVL,
-        claim_reward,
-        add_fail_reward,
-        add_single_reward,
-        finish_task,
-        start_task,
-        get_REWARD_POOL_AMT,
-        get_REWARD_SUPPLY,
-        mint_token,
-        get_verifier,
-        get_USER_2,
-        claim_xp,
+    get_ADMIN,
+    add_reward,
+    remove_reward,
+    get_USER_1,
+    get_REWARD_LVL,
+    claim_reward,
+    add_fail_reward,
+    add_single_reward,
+    finish_task,
+    start_task,
+    get_REWARD_POOL_AMT,
+    get_REWARD_SUPPLY,
+    mint_token,
+    get_verifier,
+    get_USER_2,
+    claim_xp,
     };
     use loyalty_gm::task_tests::{
-        add_task_test,
+    add_task_test,
     };
     use loyalty_gm::token_tests::{
-        claim_xp_test
+    claim_xp_test
     };
 
     // ======== Errors =========
@@ -53,7 +53,7 @@ module loyalty_gm::reward_tests {
             let ls = test_scenario::take_shared<LoyaltySystem>(scenario);
 
             assert!(vec_map::size(loyalty_system::get_rewards(&ls)) == 1, Error);
-            let (_, reward)= vec_map::get_entry_by_idx(loyalty_system::get_rewards(&ls), 0);
+            let (_, reward) = vec_map::get_entry_by_idx(loyalty_system::get_rewards(&ls), 0);
             print(reward);
 
             test_scenario::return_shared(ls);
@@ -95,7 +95,7 @@ module loyalty_gm::reward_tests {
         test_scenario::end(scenario_val);
     }
 
-     #[test]
+    #[test]
     fun claim_reward_test(): (Scenario) {
         let scenario_val = claim_xp_test();
         let scenario = &mut scenario_val;
@@ -107,7 +107,7 @@ module loyalty_gm::reward_tests {
         {
             let coin = test_scenario::take_from_sender<Coin<SUI>>(scenario);
 
-            assert!(coin::value(&coin) == get_REWARD_POOL_AMT()/get_REWARD_SUPPLY(), Error);
+            assert!(coin::value(&coin) == get_REWARD_POOL_AMT() / get_REWARD_SUPPLY(), Error);
 
             test_scenario::return_to_sender(scenario, coin);
         };

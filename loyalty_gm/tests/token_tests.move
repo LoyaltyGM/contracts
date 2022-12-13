@@ -9,15 +9,15 @@ module loyalty_gm::token_tests {
     use loyalty_gm::user_store::{Self};
     use loyalty_gm::test_utils::{mint_token};
     use loyalty_gm::system_tests::{
-        create_loyalty_system_test, 
+    create_loyalty_system_test,
     };
     use loyalty_gm::task_tests::{
-        finish_task_test,
+    finish_task_test,
     };
     use loyalty_gm::test_utils::{
-        get_USER_1,
-        get_TASK_REWARD,
-        claim_xp    
+    get_USER_1,
+    get_TASK_REWARD,
+    claim_xp
     };
 
     // ======== Errors =========
@@ -78,7 +78,7 @@ module loyalty_gm::token_tests {
             assert!(loyalty_token::get_xp(&token) == get_TASK_REWARD(), Error);
             test_scenario::return_to_sender(scenario, token);
         };
-        
+
         scenario_val
     }
 
@@ -98,7 +98,7 @@ module loyalty_gm::token_tests {
             test_scenario::return_to_sender(scenario, token);
             test_scenario::return_shared(ls);
         };
-        
+
         test_scenario::end(scenario_val);
     }
 }

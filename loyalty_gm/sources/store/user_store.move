@@ -44,7 +44,7 @@ module loyalty_gm::user_store {
         Create a new user store.
         It represents a table that maps user addresses to user data.
     */
-    public(friend) fun new(ctx: &mut TxContext): Table<address, User> {  
+    public(friend) fun new(ctx: &mut TxContext): Table<address, User> {
         table::new<address, User>(ctx)
     }
 
@@ -52,7 +52,7 @@ module loyalty_gm::user_store {
         Add a new user to the store.
     */
     public(friend) fun add_user(
-        store: &mut Table<address, User>, 
+        store: &mut Table<address, User>,
         token_id: ID,
         ctx: &mut TxContext
     ) {
@@ -72,7 +72,7 @@ module loyalty_gm::user_store {
         Update the user's XP.
     */
     public(friend) fun update_user_xp(
-        store: &mut Table<address, User>, 
+        store: &mut Table<address, User>,
         owner: address,
         reward_xp: u64
     ) {
@@ -101,8 +101,8 @@ module loyalty_gm::user_store {
         Finish a task with the given ID for the user.
     */
     public(friend) fun finish_task(
-        store: &mut Table<address, User>, 
-        task_id: ID, 
+        store: &mut Table<address, User>,
+        task_id: ID,
         owner: address,
         reward_xp: u64
     ) {

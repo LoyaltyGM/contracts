@@ -19,7 +19,7 @@ module loyalty_gm::test_utils {
     const USER_1: address = @0xAA;
     const USER_2: address = @0xBB;
 
-    const LS_NAME: vector<u8> = b"Loyalty System Name"; 
+    const LS_NAME: vector<u8> = b"Loyalty System Name";
     const LS_DESCRIPTION: vector<u8> = b"Loyalty System Description";
     const LS_URL: vector<u8> = b"https://www.loyalty.com";
     const LS_MAX_SUPPLY: u64 = 100;
@@ -32,7 +32,7 @@ module loyalty_gm::test_utils {
     const REWARD_LVL: u64 = 1;
     const REWARD_POOL_AMT: u64 = 1000;
     const REWARD_SUPPLY: u64 = 100;
-    
+
     // ======== Utility functions =========
 
     // ======== Utility functions: Constants
@@ -103,7 +103,7 @@ module loyalty_gm::test_utils {
         };
     }
 
-    public fun create_loyalty_system(scenario: &mut Scenario, creator: address) {        
+    public fun create_loyalty_system(scenario: &mut Scenario, creator: address) {
         test_scenario::next_tx(scenario, creator);
         {
             let system_store = test_scenario::take_shared<SystemStore<SYSTEM_STORE>>(scenario);
@@ -135,9 +135,9 @@ module loyalty_gm::test_utils {
             loyalty_system::add_task(
                 &admin_cap,
                 &mut ls,
-                b"name", 
-                b"description", 
-                TASK_REWARD, 
+                b"name",
+                b"description",
+                TASK_REWARD,
                 object::id(&admin_cap),
                 b"module",
                 b"function_name",
@@ -174,14 +174,14 @@ module loyalty_gm::test_utils {
             let ls = test_scenario::take_shared<LoyaltySystem>(scenario);
             let admin_cap = test_scenario::take_from_sender<AdminCap>(scenario);
             let coin = test_scenario::take_from_sender<Coin<SUI>>(scenario);
-            
+
             loyalty_system::add_reward(
                 &admin_cap,
                 &mut ls,
-                REWARD_LVL, 
-                b"url reward", 
-                b"reward description", 
-                coin, 
+                REWARD_LVL,
+                b"url reward",
+                b"reward description",
+                coin,
                 REWARD_SUPPLY,
                 test_scenario::ctx(scenario)
             );
@@ -197,14 +197,14 @@ module loyalty_gm::test_utils {
             let ls = test_scenario::take_shared<LoyaltySystem>(scenario);
             let admin_cap = test_scenario::take_from_sender<AdminCap>(scenario);
             let coin = test_scenario::take_from_sender<Coin<SUI>>(scenario);
-            
+
             loyalty_system::add_reward(
                 &admin_cap,
                 &mut ls,
-                REWARD_LVL, 
-                b"url reward", 
-                b"reward description", 
-                coin, 
+                REWARD_LVL,
+                b"url reward",
+                b"reward description",
+                coin,
                 99,
                 test_scenario::ctx(scenario)
             );
@@ -220,14 +220,14 @@ module loyalty_gm::test_utils {
             let ls = test_scenario::take_shared<LoyaltySystem>(scenario);
             let admin_cap = test_scenario::take_from_sender<AdminCap>(scenario);
             let coin = test_scenario::take_from_sender<Coin<SUI>>(scenario);
-            
+
             loyalty_system::add_reward(
                 &admin_cap,
                 &mut ls,
-                REWARD_LVL, 
-                b"url reward", 
-                b"reward description", 
-                coin, 
+                REWARD_LVL,
+                b"url reward",
+                b"reward description",
+                coin,
                 1,
                 test_scenario::ctx(scenario)
             );
@@ -281,7 +281,7 @@ module loyalty_gm::test_utils {
             let ls = test_scenario::take_shared<LoyaltySystem>(scenario);
 
             loyalty_system::get_verifier(test_scenario::ctx(scenario));
-            
+
             test_scenario::return_shared(ls);
         };
     }

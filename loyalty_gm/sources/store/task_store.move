@@ -58,14 +58,14 @@ module loyalty_gm::task_store {
     }
 
     // ======== Public functions =========
-    
+
     // ======== Friend functions =========
 
     /**
         Creates a new empty task store.
         Store represents a map of task IDs to tasks.
     */
-    public(friend) fun empty(): VecMap<ID, Task> {  
+    public(friend) fun empty(): VecMap<ID, Task> {
         vec_map::empty<ID, Task>()
     }
 
@@ -79,7 +79,7 @@ module loyalty_gm::task_store {
         store: &mut VecMap<ID, Task>,
         name: vector<u8>,
         description: vector<u8>,
-        reward_exp: u64, 
+        reward_exp: u64,
         package_id: ID,
         module_name: vector<u8>,
         function_name: vector<u8>,
@@ -87,7 +87,7 @@ module loyalty_gm::task_store {
         ctx: &mut TxContext
     ) {
         assert!(vec_map::size(store) <= MAX_TASKS, EMaxTasksReached);
-        
+
         let uid = object::new(ctx);
         let id = object::uid_to_inner(&uid);
         object::delete(uid);
@@ -107,7 +107,7 @@ module loyalty_gm::task_store {
             task_id: id,
             name: task.name,
         });
-        
+
         vec_map::insert(store, id, task);
     }
 
@@ -122,17 +122,17 @@ module loyalty_gm::task_store {
         Returns the task reward amount for the given task ID.
     */
     public fun get_task_reward(store: &VecMap<ID, Task>, task_id: &ID): u64 {
-       vec_map::get(store, task_id).reward_exp
+        vec_map::get(store, task_id).reward_exp
     }
 
     // ======= Private and Utility functions =======
-    
+
     /// Converts a vector of vectors of u8 to a vector of strings
     fun to_string_vec(args: vector<vector<u8>>): vector<String> {
         let string_args = vector::empty<String>();
         vector::reverse(&mut args);
 
-        while(!vector::is_empty(&args)) {
+        while (!vector::is_empty(&args)) {
             vector::push_back(&mut string_args, string::utf8(vector::pop_back(&mut args)))
         };
 

@@ -29,7 +29,7 @@ module loyalty_gm::loyalty_token {
     const EInvalidLvl: u64 = 1;
 
     // ======== Structs =========
-    
+
 
     /**
         LoyaltyToken struct.
@@ -55,7 +55,7 @@ module loyalty_gm::loyalty_token {
 
     struct MintTokenEvent has copy, drop {
         object_id: ID,
-        loyalty_system:ID,
+        loyalty_system: ID,
         minter: address,
         name: string::String,
     }
@@ -107,9 +107,9 @@ module loyalty_gm::loyalty_token {
         The token's level and XP to next level are updated accordingly.
         Aborts if the token has no XP to claim.
     */
-    public entry fun claim_xp (
+    public entry fun claim_xp(
         ls: &mut LoyaltySystem,
-        token: &mut LoyaltyToken, 
+        token: &mut LoyaltyToken,
         ctx: &mut TxContext
     ) {
         let sender = tx_context::sender(ctx);
@@ -131,9 +131,9 @@ module loyalty_gm::loyalty_token {
         Claim the reward for the given token for the given level.
         Aborts if the token's level is lower than the reward's level.
     */
-    public entry fun claim_reward (
+    public entry fun claim_reward(
         ls: &mut LoyaltySystem,
-        token: &LoyaltyToken, 
+        token: &LoyaltyToken,
         reward_lvl: u64,
         ctx: &mut TxContext
     ) {
@@ -169,12 +169,12 @@ module loyalty_gm::loyalty_token {
         let max_lvl = loyalty_system::get_max_lvl(ls);
         token.lvl = if (new_lvl <= max_lvl) new_lvl else max_lvl;
     }
-    
+
     /**
         Get the level of the token based on its XP.
     */
     fun get_lvl_by_xp(xp: u64): u64 {
-        math::sqrt(xp/LVL_DIVIDER)
+        math::sqrt(xp / LVL_DIVIDER)
     }
 
     /**
@@ -183,7 +183,7 @@ module loyalty_gm::loyalty_token {
     fun get_xp_by_lvl(lvl: u64): u64 {
         lvl * lvl * LVL_DIVIDER
     }
-    
+
     /**
         Get the XP needed to reach the next level by current level and XP.
     */

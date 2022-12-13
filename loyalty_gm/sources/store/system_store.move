@@ -42,7 +42,7 @@ module loyalty_gm::system_store {
     /**
         The add_system function adds a new loyalty system ID to the vector.
     */
-    public(friend) fun add_system(store: &mut SystemStore<SYSTEM_STORE>, loyalty_system_id: ID, _: &mut TxContext) {  
+    public(friend) fun add_system(store: &mut SystemStore<SYSTEM_STORE>, loyalty_system_id: ID, _: &mut TxContext) {
         vector::push_back(&mut store.systems, loyalty_system_id);
     }
 
