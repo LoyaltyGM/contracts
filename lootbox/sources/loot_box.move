@@ -30,7 +30,6 @@ module lootbox::loot_box {
     const COUNTER_KEY: vector<u8> = b"_box_counter_per_acount";
 
     // ======== Errors =========
-
     const EAmountIncorrect: u64 = 0;
     const EMaxSupplyReaced: u64 = 1;
     const EMaxMintedPerAddress: u64 = 2; 
@@ -70,12 +69,14 @@ module lootbox::loot_box {
     struct LootBox has key, store {
         id: UID,
         name: String,
+        description: String,
         url: Url,
     }
     /// Open loot with rarity options
     struct Loot has key, store {
         id: UID,
         name: String,
+        description: String,
         rarity: String,
         score: u64,
         url: Url
@@ -106,7 +107,7 @@ module lootbox::loot_box {
         let collection = BoxCollection {
             id: object::new(ctx),
             creator: tx_context::sender(ctx),
-            box_max_supply: 1000,
+            box_max_supply: 30_000,
             box_url: url::new_unsafe_from_bytes(BOX_URL),
             box_price: 10_000_000, // 0.01
             rarity_types: rarity_types,
@@ -167,6 +168,7 @@ module lootbox::loot_box {
         let box = LootBox {
             id: object::new(ctx),
             name: string::utf8(b"Mystery Box"),
+            description: string::utf8(b"Unopened box"),
             url: url::new_unsafe_from_bytes(BOX_URL),
         };
 
@@ -190,10 +192,10 @@ module lootbox::loot_box {
 
     public entry fun open_box(collection: &mut BoxCollection, box: LootBox, ctx: &mut TxContext) {
         let sender = tx_context::sender(ctx);
-        let LootBox{ id, name: _, url: _ } = box;
+        let LootBox{ id, name: _, description: _, url: _ } = box;
 
         let loot = get_loot(collection, ctx);
-
+        // Event for open box
         emit(OpenBoxEvent {
             box_id: object::uid_to_inner(&id),
             loot_id: object::id(&loot),
@@ -213,6 +215,7 @@ module lootbox::loot_box {
         Loot {
             id: object::new(ctx),
             name: string::utf8(b"LOOT"),
+            description: string::utf8(b"LoyaltyGM Loot Prize"),
             rarity: rarity,
             score: score,
             url: get_loot_rarity_url(rarity),
