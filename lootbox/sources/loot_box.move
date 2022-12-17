@@ -25,7 +25,7 @@ module lootbox::loot_box {
     const LOOT_ERROR_URL: vector<u8> = b"ipfs://QmYZCHwX27MkLeoewBdK3vMhNEGs9MNtRTyHgR2dSWVa2S";
     
     // Max minted per address
-    const MAX_MINTED_PER_ADDRESS: u64 = 3;
+    const MAX_MINTED_PER_ADDRESS: u64 = 1;
     // For dynamic field table
     const COUNTER_KEY: vector<u8> = b"_box_counter_per_acount";
 
@@ -65,13 +65,14 @@ module lootbox::loot_box {
         _box_opened: u64,
     }
 
-    /// Unopened box after buy box 
+    /// Unopened box(Mythery box) before open
     struct LootBox has key, store {
         id: UID,
         name: String,
         description: String,
         url: Url,
     }
+
     /// Open loot with rarity options
     struct Loot has key, store {
         id: UID,
@@ -144,7 +145,7 @@ module lootbox::loot_box {
     public fun get_lootbox_rarity(box: &Loot): String {
         box.rarity
     }
-    // sui client call --function buy_box --module loot_box --package 0xf23231864bfbd32c76cfc3f55b80df05558cf6a7 --args 0x4a46f378e4df8e1774840d7ea2071652820f618f 10000000 --gas-budget 1000
+    
     // SETTER
     public entry fun buy_box(
         collection: &mut BoxCollection,
