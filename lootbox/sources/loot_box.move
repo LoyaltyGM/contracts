@@ -25,7 +25,7 @@ module lootbox::loot_box {
     const LOOT_ERROR_URL: vector<u8> = b"ipfs://QmYZCHwX27MkLeoewBdK3vMhNEGs9MNtRTyHgR2dSWVa2S";
     
     // Max minted per address
-    const MAX_MINTED_PER_ADDRESS: u64 = 1;
+    const MAX_MINTED_PER_ADDRESS: u64 = 2;
     // For dynamic field table
     const COUNTER_KEY: vector<u8> = b"_box_counter_per_acount";
 

@@ -5,7 +5,7 @@ module lootbox::loot_box_tests {
     use lootbox::loot_box;
     use sui::test_scenario::{Self, Scenario};
     use std::string;
-    use std::debug;
+    // use std::debug;
     // use sui::sui::SUI;
     // use sui::coin;
 
@@ -78,7 +78,7 @@ module lootbox::loot_box_tests {
            let box_val = test_scenario::take_from_sender<loot_box::LootBox>(scenario);
            let lootbox_val = test_scenario::take_shared<loot_box::BoxCollection>(scenario);
            let lootbox = &mut lootbox_val;
-           debug::print(&box_val);
+           //debug::print(&box_val);
            assert!(loot_box::get_box_minted(lootbox) == 1, 1);
            // open box
            loot_box::open_box(lootbox, box_val, test_scenario::ctx(scenario));
@@ -148,7 +148,7 @@ module lootbox::loot_box_tests {
         let scenario_val = test_scenario::begin(OWNER);
         let scenario = &mut scenario_val;
         create_collection(scenario, MAX_SUPPLY);
-        buy_multiple_times(scenario, COIN_TO_BUY_BOX, 4);
+        buy_multiple_times(scenario, COIN_TO_BUY_BOX, 3);
         test_scenario::end(scenario_val);
     }
     
