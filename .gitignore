@@ -2,6 +2,7 @@ examples/**/*
 loyalty_gm/build/*
 referal_system/build/*
 nft_reveal/build/*
+lootbox/build/*
 *sui.log*
 .DS_Store
 .idea
