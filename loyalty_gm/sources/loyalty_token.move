@@ -1,76 +1,83 @@
+/**
+    Loyalty Token module.
+    This module contains the Loyalty NFT struct and its functions.
+    Module for minting and managing Loyalty NFT by users.
+*/
 module loyalty_gm::loyalty_token {
-    use sui::object::{Self, UID, ID};
     use std::string::{Self, String};
+
+    use sui::object::{Self, UID, ID};
     use sui::transfer;
     use sui::url::{Url};
-    use sui::object_table::{ObjectTable};
     use sui::tx_context::{Self, TxContext};
     use sui::event::{emit};
+    use sui::math::{Self};
+
     use loyalty_gm::loyalty_system::{Self, LoyaltySystem};
-    use loyalty_gm::user_store::{Self, UserData};
+    use loyalty_gm::user_store::{Self};
+    use loyalty_gm::reward_store::{Self};
 
     // ======== Constants =========
 
-    const INITIAL_LVL: u8 = 0;
-    const INITIAL_EXP: u64 = 0;
+    const INITIAL_LVL: u64 = 0;
+    const INITIAL_XP: u64 = 0;
+    const LVL_DIVIDER: u64 = 50;
 
     // ======== Error codes =========
 
-    const ENotUniqueAddress: u64 = 0;
-    const ETooManyMint: u64 = 1;
-    const ENoClaimableExp: u64 = 2;
-    const EAdminOnly: u64 = 3;
-    const EInvalidTokenStore: u64 = 4;
+    const ENoClaimableXp: u64 = 0;
+    const EInvalidLvl: u64 = 1;
 
     // ======== Structs =========
 
-    /// Loyalty NFT.
-    struct LoyaltyToken has key, store {
+
+    /**
+        LoyaltyToken struct.
+        This struct represents a LoyaltyToken.
+        It contains the ID of the LoyaltySystem it belongs to, its name, description, url, level and XP.
+    */
+    struct LoyaltyToken has key {
         id: UID,
+        /// ID of the LoyaltySystem which this token belongs to.
         loyalty_system: ID,
         name: String,
         description: String,
         url: Url,
-
-        // Level of nft [0-255]
-        level: u8,
-        // Expiration timestamp (UNIX time) - app specific
-        current_exp: u64,
-        // TODO:
-        // array of lvl points 
-        // pointsToNextLvl: u128,
+        /// Current level of the token.
+        lvl: u64,
+        /// Current XP of the token.
+        xp: u64,
+        /// XP needed to reach the next level.
+        xp_to_next_lvl: u64,
     }
 
     // ======== Events =========
 
     struct MintTokenEvent has copy, drop {
         object_id: ID,
-        loyalty_system:ID,
+        loyalty_system: ID,
         minter: address,
         name: string::String,
     }
 
-    struct ClaimExpEvent has copy, drop {
+    struct ClaimXpEvent has copy, drop {
         token_id: ID,
         claimer: address,
-        claimed_exp: u64,
+        claimed_xp: u64,
     }
 
 
     // ======= Public functions =======
 
+    /**
+        Mint a new LoyaltyToken for the given LoyaltySystem.
+        The token is minted with the same name, description and url as the LoyaltySystem.
+    */
     public entry fun mint(
         ls: &mut LoyaltySystem,
-        user_store: &mut ObjectTable<address, UserData>,
         ctx: &mut TxContext
     ) {
-        assert!(*loyalty_system::get_user_store_id(ls) == object::id(user_store), EInvalidTokenStore);
-
-        assert!(user_store::user_exists(user_store, tx_context::sender(ctx)) == false, ENotUniqueAddress);
-
         loyalty_system::increment_total_minted(ls);
-        assert!(*loyalty_system::get_total_minted(ls) <= *loyalty_system::get_max_supply(ls), ETooManyMint);
-
 
         let nft = LoyaltyToken {
             id: object::new(ctx),
@@ -78,8 +85,9 @@ module loyalty_gm::loyalty_token {
             name: *loyalty_system::get_name(ls),
             description: *loyalty_system::get_description(ls),
             url: *loyalty_system::get_url(ls),
-            level: INITIAL_LVL,
-            current_exp: INITIAL_EXP,
+            lvl: INITIAL_LVL,
+            xp: INITIAL_XP,
+            xp_to_next_lvl: get_xp_to_next_lvl(INITIAL_LVL, INITIAL_XP),
         };
         let sender = tx_context::sender(ctx);
 
@@ -90,38 +98,106 @@ module loyalty_gm::loyalty_token {
             name: nft.name,
         });
 
-        user_store::add_new_data(user_store, object::id(&nft), ctx);
+        user_store::add_user(loyalty_system::get_mut_user_store(ls), object::id(&nft), ctx);
         transfer::transfer(nft, sender);
     }
 
-    public entry fun claim_exp (
-        token: &mut LoyaltyToken, 
-        user_store: &mut ObjectTable<address, UserData>,
+    /**
+        Claim the XP earned by the given token.
+        The token's level and XP to next level are updated accordingly.
+        Aborts if the token has no XP to claim.
+    */
+    public entry fun claim_xp(
+        ls: &mut LoyaltySystem,
+        token: &mut LoyaltyToken,
         ctx: &mut TxContext
     ) {
-        assert!(token.loyalty_system == object::id(user_store), EInvalidTokenStore);
-
         let sender = tx_context::sender(ctx);
-        let claimable_exp = user_store::get_data_exp(user_store, sender);
+        let claimable_xp = user_store::get_user_xp(loyalty_system::get_user_store(ls), sender);
+        assert!(claimable_xp > 0, ENoClaimableXp);
 
-        assert!(claimable_exp > 0, ENoClaimableExp);
-
-        emit(ClaimExpEvent {
+        emit(ClaimXpEvent {
             token_id: object::id(token),
             claimer: sender,
-            claimed_exp: claimable_exp,
+            claimed_xp: claimable_xp,
         });
 
-        user_store::reset_data_exp(user_store, sender);
+        user_store::reset_user_xp(loyalty_system::get_mut_user_store(ls), sender);
 
-        update_token_exp(claimable_exp, token);
+        update_token_stats(claimable_xp, ls, token);
     }
 
-    // ======== Admin Functions =========
+    /**
+        Claim the reward for the given token for the given level.
+        Aborts if the token's level is lower than the reward's level.
+    */
+    public entry fun claim_reward(
+        ls: &mut LoyaltySystem,
+        token: &LoyaltyToken,
+        reward_lvl: u64,
+        ctx: &mut TxContext
+    ) {
+        assert!(token.lvl >= reward_lvl, EInvalidLvl);
+        reward_store::claim_reward(loyalty_system::get_mut_reward(ls, reward_lvl), ctx);
+    }
+
+    /**
+        This function is called by the user.
+        User function to start task.
+        Verifier cant finish task if user didnt start it.
+    */
+    public entry fun start_task(loyalty_system: &mut LoyaltySystem, task_id: ID, ctx: &mut TxContext) {
+        user_store::start_task(loyalty_system::get_mut_user_store(loyalty_system), task_id, tx_context::sender(ctx))
+    }
 
     // ======= Private and Utility functions =======
 
-    fun update_token_exp(exp_to_add: u64, token: &mut LoyaltyToken) {
-        token.current_exp = token.current_exp + exp_to_add;
+    /**
+        Update the token's level and XP based on the given XP to add.
+    */
+    fun update_token_stats(
+        xp_to_add: u64,
+        ls: &mut LoyaltySystem,
+        token: &mut LoyaltyToken,
+    ) {
+        let new_xp = token.xp + xp_to_add;
+        let new_lvl = get_lvl_by_xp(new_xp);
+
+        token.xp = new_xp;
+        token.xp_to_next_lvl = get_xp_to_next_lvl(new_lvl, new_xp);
+
+        let max_lvl = loyalty_system::get_max_lvl(ls);
+        token.lvl = if (new_lvl <= max_lvl) new_lvl else max_lvl;
+    }
+
+    /**
+        Get the level of the token based on its XP.
+    */
+    fun get_lvl_by_xp(xp: u64): u64 {
+        math::sqrt(xp / LVL_DIVIDER)
+    }
+
+    /**
+        Get the XP needed to reach the given level.
+    */
+    fun get_xp_by_lvl(lvl: u64): u64 {
+        lvl * lvl * LVL_DIVIDER
+    }
+
+    /**
+        Get the XP needed to reach the next level by current level and XP.
+    */
+    fun get_xp_to_next_lvl(lvl: u64, xp: u64): u64 {
+        get_xp_by_lvl(lvl + 1) - xp
+    }
+
+    #[test_only]
+    public fun get_xp(token: &LoyaltyToken): u64 {
+        token.xp
+    }
+
+    #[test_only]
+    public fun get_lvl(token: &LoyaltyToken): u64 {
+        token.lvl
     }
 }
