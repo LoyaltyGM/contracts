@@ -30,6 +30,7 @@ module loyalty_gm::loyalty_system {
     const MAX_NAME_LENGTH: u64 = 32;
     const MAX_DESCRIPTION_LENGTH: u64 = 255;
     const BASIC_MAX_LVL: u64 = 100;
+    const ADMIN_CAP_IMAGE_URL: vector<u8> = b"ipfs://bafybeia7wcjeumzhyizqogeon7urjdgll5zpms3sckvfv6tut77i3kneru/Favicon.png";
 
     // ======== Error codes =========
     const EAdminOnly: u64 = 0;
@@ -158,7 +159,7 @@ module loyalty_gm::loyalty_system {
             id: object::new(ctx),
             name: string::utf8(b"Admin Cap"),
             description: string::utf8(b"Allows to manage the loyalty system"),
-            image_url: url::new_unsafe_from_bytes(image_url),
+            image_url: url::new_unsafe_from_bytes(ADMIN_CAP_IMAGE_URL),
             loyalty_system: object::uid_to_inner(&loyalty_system.id),
         }, creator);
 
