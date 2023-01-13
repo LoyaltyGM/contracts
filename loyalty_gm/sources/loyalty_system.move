@@ -46,6 +46,9 @@ module loyalty_gm::loyalty_system {
     */ 
     struct AdminCap has key, store { 
         id: UID,
+        name: String,
+        description: String,
+        image_url: Url,
         loyalty_system: ID,
     }
 
@@ -153,6 +156,9 @@ module loyalty_gm::loyalty_system {
 
         transfer::transfer(AdminCap {
             id: object::new(ctx),
+            name: string::utf8(b"Admin Cap"),
+            description: string::utf8(b"Allows to manage the loyalty system"),
+            image_url: url::new_unsafe_from_bytes(image_url),
             loyalty_system: object::uid_to_inner(&loyalty_system.id),
         }, creator);
 
