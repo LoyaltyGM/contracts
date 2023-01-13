@@ -30,7 +30,7 @@ module loyalty_gm::loyalty_system {
     const MAX_NAME_LENGTH: u64 = 32;
     const MAX_DESCRIPTION_LENGTH: u64 = 255;
     const BASIC_MAX_LVL: u64 = 100;
-    const ADMIN_CAP_IMAGE_URL: vector<u8> = b"ipfs://bafybeia7wcjeumzhyizqogeon7urjdgll5zpms3sckvfv6tut77i3kneru/Favicon.png";
+    const ADMIN_CAP_URL: vector<u8> = b"ipfs://bafybeia7wcjeumzhyizqogeon7urjdgll5zpms3sckvfv6tut77i3kneru/Favicon.png";
 
     // ======== Error codes =========
     const EAdminOnly: u64 = 0;
@@ -49,7 +49,7 @@ module loyalty_gm::loyalty_system {
         id: UID,
         name: String,
         description: String,
-        image_url: Url,
+        url: Url,
         loyalty_system: ID,
     }
 
@@ -77,7 +77,7 @@ module loyalty_gm::loyalty_system {
         /// Loyalty NFTs total max supply
         max_supply: u64,
         /// Loyalty system image url
-        image_url: Url,
+        url: Url,
         creator: address,
         /// Max level of the loyalty NFTs
         max_lvl: u64,
@@ -123,7 +123,7 @@ module loyalty_gm::loyalty_system {
     public entry fun create_loyalty_system(
         name: vector<u8>, 
         description: vector<u8>, 
-        image_url: vector<u8>,
+        url: vector<u8>,
         max_supply: u64,
         max_lvl: u64,
         system_store: &mut SystemStore<SYSTEM_STORE>,
@@ -139,7 +139,7 @@ module loyalty_gm::loyalty_system {
             id: object::new(ctx),
             name: string::utf8(name),
             description: string::utf8(description),
-            image_url: url::new_unsafe_from_bytes(image_url),
+            url: url::new_unsafe_from_bytes(url),
             total_minted: 0,
             max_supply,
             creator,
@@ -159,7 +159,7 @@ module loyalty_gm::loyalty_system {
             id: object::new(ctx),
             name: string::utf8(b"Admin Cap"),
             description: string::utf8(b"Allows to manage the loyalty system"),
-            image_url: url::new_unsafe_from_bytes(ADMIN_CAP_IMAGE_URL),
+            url: url::new_unsafe_from_bytes(ADMIN_CAP_URL),
             loyalty_system: object::uid_to_inner(&loyalty_system.id),
         }, creator);
 
@@ -181,9 +181,9 @@ module loyalty_gm::loyalty_system {
         loyalty_system.description = string::utf8(new_description);
     }
 
-    public entry fun update_image_url(admin_cap: &AdminCap, loyalty_system: &mut LoyaltySystem, new_image_url: vector<u8> ){
+    public entry fun update_url(admin_cap: &AdminCap, loyalty_system: &mut LoyaltySystem, new_url: vector<u8> ){
         check_admin(admin_cap, loyalty_system);
-        loyalty_system.image_url = url::new_unsafe_from_bytes(new_image_url);
+        loyalty_system.url = url::new_unsafe_from_bytes(new_url);
     }
 
     public entry fun update_max_supply(admin_cap: &AdminCap, loyalty_system: &mut LoyaltySystem, new_max_supply: u64 ){
@@ -201,7 +201,7 @@ module loyalty_gm::loyalty_system {
         admin_cap: &AdminCap, 
         loyalty_system: &mut LoyaltySystem,
         level: u64, 
-        image_url: vector<u8>,
+        url: vector<u8>,
         description: vector<u8>, 
         reward_pool: Coin<SUI>,
         reward_supply: u64,
@@ -213,7 +213,7 @@ module loyalty_gm::loyalty_system {
         reward_store::add_reward(
             &mut loyalty_system.rewards, 
             level, 
-            image_url,
+            url,
             description,
             reward_pool,
             reward_supply,
@@ -336,8 +336,8 @@ module loyalty_gm::loyalty_system {
         &loyalty_system.description
     }
 
-    public fun get_image_url(loyalty_system: &LoyaltySystem): &Url {
-        &loyalty_system.image_url
+    public fun get_url(loyalty_system: &LoyaltySystem): &Url {
+        &loyalty_system.url
     }
 
     public fun get_user_store(loyalty_system: &LoyaltySystem): &Table<address, User> {

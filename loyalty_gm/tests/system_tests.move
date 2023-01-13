@@ -64,7 +64,7 @@ module loyalty_gm::system_tests {
 
             assert!(*loyalty_system::get_name(&ls) == string::utf8(get_LS_NAME()), Error);
             assert!(*loyalty_system::get_description(&ls) == string::utf8(get_LS_DESCRIPTION()), Error);
-            assert!(*loyalty_system::get_image_url(&ls) == url::new_unsafe_from_bytes(get_LS_URL()), Error);
+            assert!(*loyalty_system::get_url(&ls) == url::new_unsafe_from_bytes(get_LS_URL()), Error);
             assert!(loyalty_system::get_max_supply(&ls) == get_LS_MAX_SUPPLY(), Error);
             assert!(loyalty_system::get_max_lvl(&ls) == get_LS_MAX_LVL(), Error);
 
