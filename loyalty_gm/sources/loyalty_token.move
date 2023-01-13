@@ -42,7 +42,7 @@ module loyalty_gm::loyalty_token {
         loyalty_system: ID,
         name: String,
         description: String,
-        url: Url,
+        image_url: Url,
         /// Current level of the token.
         lvl: u64,
         /// Current XP of the token.
@@ -84,7 +84,7 @@ module loyalty_gm::loyalty_token {
             loyalty_system: object::id(ls),
             name: *loyalty_system::get_name(ls),
             description: *loyalty_system::get_description(ls),
-            url: *loyalty_system::get_url(ls),
+            image_url: *loyalty_system::get_image_url(ls),
             lvl: INITIAL_LVL,
             xp: INITIAL_XP,
             xp_to_next_lvl: get_xp_to_next_lvl(INITIAL_LVL, INITIAL_XP),

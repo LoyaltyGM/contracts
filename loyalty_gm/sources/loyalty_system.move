@@ -119,7 +119,7 @@ module loyalty_gm::loyalty_system {
     public entry fun create_loyalty_system(
         name: vector<u8>, 
         description: vector<u8>, 
-        url: vector<u8>,
+        image_url: vector<u8>,
         max_supply: u64,
         max_lvl: u64,
         system_store: &mut SystemStore<SYSTEM_STORE>,
@@ -135,7 +135,7 @@ module loyalty_gm::loyalty_system {
             id: object::new(ctx),
             name: string::utf8(name),
             description: string::utf8(description),
-            image_url: url::new_unsafe_from_bytes(url),
+            image_url: url::new_unsafe_from_bytes(image_url),
             total_minted: 0,
             max_supply,
             creator,
@@ -174,9 +174,9 @@ module loyalty_gm::loyalty_system {
         loyalty_system.description = string::utf8(new_description);
     }
 
-    public entry fun update_url(admin_cap: &AdminCap, loyalty_system: &mut LoyaltySystem, new_url: vector<u8> ){
+    public entry fun update_image_url(admin_cap: &AdminCap, loyalty_system: &mut LoyaltySystem, new_image_url: vector<u8> ){
         check_admin(admin_cap, loyalty_system);
-        loyalty_system.image_url = url::new_unsafe_from_bytes(new_url);
+        loyalty_system.image_url = url::new_unsafe_from_bytes(new_image_url);
     }
 
     public entry fun update_max_supply(admin_cap: &AdminCap, loyalty_system: &mut LoyaltySystem, new_max_supply: u64 ){
@@ -194,7 +194,7 @@ module loyalty_gm::loyalty_system {
         admin_cap: &AdminCap, 
         loyalty_system: &mut LoyaltySystem,
         level: u64, 
-        url: vector<u8>,
+        image_url: vector<u8>,
         description: vector<u8>, 
         reward_pool: Coin<SUI>,
         reward_supply: u64,
@@ -206,7 +206,7 @@ module loyalty_gm::loyalty_system {
         reward_store::add_reward(
             &mut loyalty_system.rewards, 
             level, 
-            url,
+            image_url,
             description,
             reward_pool,
             reward_supply,
@@ -329,7 +329,7 @@ module loyalty_gm::loyalty_system {
         &loyalty_system.description
     }
 
-    public fun get_url(loyalty_system: &LoyaltySystem): &Url {
+    public fun get_image_url(loyalty_system: &LoyaltySystem): &Url {
         &loyalty_system.image_url
     }
 
