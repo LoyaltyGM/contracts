@@ -73,7 +73,7 @@ module loyalty_gm::loyalty_system {
         /// Loyalty NFTs total max supply
         max_supply: u64,
         /// Loyalty system image url
-        url: Url,
+        image_url: Url,
         creator: address,
         /// Max level of the loyalty NFTs
         max_lvl: u64,
@@ -135,7 +135,7 @@ module loyalty_gm::loyalty_system {
             id: object::new(ctx),
             name: string::utf8(name),
             description: string::utf8(description),
-            url: url::new_unsafe_from_bytes(url),
+            image_url: url::new_unsafe_from_bytes(url),
             total_minted: 0,
             max_supply,
             creator,
@@ -176,7 +176,7 @@ module loyalty_gm::loyalty_system {
 
     public entry fun update_url(admin_cap: &AdminCap, loyalty_system: &mut LoyaltySystem, new_url: vector<u8> ){
         check_admin(admin_cap, loyalty_system);
-        loyalty_system.url = url::new_unsafe_from_bytes(new_url);
+        loyalty_system.image_url = url::new_unsafe_from_bytes(new_url);
     }
 
     public entry fun update_max_supply(admin_cap: &AdminCap, loyalty_system: &mut LoyaltySystem, new_max_supply: u64 ){
@@ -330,7 +330,7 @@ module loyalty_gm::loyalty_system {
     }
 
     public fun get_url(loyalty_system: &LoyaltySystem): &Url {
-        &loyalty_system.url
+        &loyalty_system.image_url
     }
 
     public fun get_user_store(loyalty_system: &LoyaltySystem): &Table<address, User> {
