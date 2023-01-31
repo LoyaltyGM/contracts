@@ -13,7 +13,6 @@ module loyalty_gm::reward_store {
     use sui::tx_context::{Self, TxContext};
     use sui::vec_map::{Self, VecMap};
     use sui::transfer;
-    use sui::url::{Self, Url};
     use sui::coin::{Self, Coin};
     use sui::sui::SUI;
     use sui::table::{Self};
