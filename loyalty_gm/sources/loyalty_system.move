@@ -98,7 +98,9 @@ module loyalty_gm::loyalty_system {
     struct CreateLoyaltySystemEvent has copy, drop {
         /// The Object ID of the NFT
         object_id: ID,
-        /// The creator of the NFT
+        /// To control the access to the admin functions
+        admin_cap: ID,
+        /// The creator of LS
         creator: address,
         /// The name of the NFT
         name: string::String,
@@ -149,22 +151,24 @@ module loyalty_gm::loyalty_system {
         };
         dof::add(&mut loyalty_system.id, USER_STORE_KEY, user_store::new(ctx));
 
-        emit(CreateLoyaltySystemEvent {
-            object_id: object::uid_to_inner(&loyalty_system.id),
-            creator,
-            name: loyalty_system.name,
-        });
-
-        transfer::transfer(AdminCap {
+        let admin_cap = AdminCap {
             id: object::new(ctx),
             name: string::utf8(b"Admin Cap"),
             description: string::utf8(b"Allows to manage the loyalty system"),
             url: url::new_unsafe_from_bytes(ADMIN_CAP_URL),
             loyalty_system: object::uid_to_inner(&loyalty_system.id),
-        }, creator);
+        };
+
+        emit(CreateLoyaltySystemEvent {
+            object_id: object::uid_to_inner(&loyalty_system.id),
+            creator,
+            name: loyalty_system.name,
+            admin_cap: object::uid_to_inner(&admin_cap.id),
+        });
 
         system_store::add_system(system_store, object::uid_to_inner(&loyalty_system.id), ctx);
         transfer::share_object(loyalty_system);
+        transfer::transfer(admin_cap, creator);
     }
 
     // ======== Admin Functions: Update
@@ -201,6 +205,7 @@ module loyalty_gm::loyalty_system {
         admin_cap: &AdminCap, 
         loyalty_system: &mut LoyaltySystem,
         level: u64, 
+        // TODO: remove
         url: vector<u8>,
         description: vector<u8>, 
         reward_pool: Coin<SUI>,
