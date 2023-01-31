@@ -42,7 +42,6 @@ module loyalty_gm::reward_store {
     struct Reward has key, store {
         id: UID,
         level: u64,
-        url: Url,
         description: String,
         reward_pool: Balance<SUI>,
         reward_supply: u64,
@@ -79,7 +78,6 @@ module loyalty_gm::reward_store {
     public(friend) fun add_reward(
         store: &mut VecMap<u64, Reward>,
         level: u64,
-        url: vector<u8>,
         description: vector<u8>,
         reward_pool: Coin<SUI>,
         reward_supply: u64,
@@ -92,7 +90,6 @@ module loyalty_gm::reward_store {
         let reward = Reward {
             id: object::new(ctx),
             level,
-            url: url::new_unsafe_from_bytes(url),
             description: string::utf8(description),
             reward_pool: balance,
             reward_supply,
@@ -184,7 +181,6 @@ module loyalty_gm::reward_store {
             id,
             description: _,
             level: _,
-            url: _,
             reward_pool,
             reward_supply: _,
             reward_per_user: _,

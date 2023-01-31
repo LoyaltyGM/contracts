@@ -205,8 +205,6 @@ module loyalty_gm::loyalty_system {
         admin_cap: &AdminCap, 
         loyalty_system: &mut LoyaltySystem,
         level: u64, 
-        // TODO: remove
-        url: vector<u8>,
         description: vector<u8>, 
         reward_pool: Coin<SUI>,
         reward_supply: u64,
@@ -218,7 +216,6 @@ module loyalty_gm::loyalty_system {
         reward_store::add_reward(
             &mut loyalty_system.rewards, 
             level, 
-            url,
             description,
             reward_pool,
             reward_supply,
