@@ -372,8 +372,15 @@ module loyalty_gm::loyalty_system {
     }
 
     #[test_only]
+    fun init_test(ctx: &mut TxContext) {
+        transfer::transfer(VerifierCap {
+            id: object::new(ctx)
+        }, tx_context::sender(ctx))
+    }
+
+    #[test_only]
     public fun get_verifier(ctx: &mut TxContext) {
-        init(ctx)
+        init_test(ctx)
     }
 
     #[test_only]
