@@ -122,7 +122,7 @@ module loyalty_gm::test_utils {
         };
     }
 
-    public fun add_task(scenario: &mut Scenario) {
+    public fun add_task(scenario: &mut Scenario, task_lvl: u64) {
         test_scenario::next_tx(scenario, ADMIN);
         {
             let ls = test_scenario::take_shared<LoyaltySystem>(scenario);
@@ -135,6 +135,7 @@ module loyalty_gm::test_utils {
             loyalty_system::add_task(
                 &admin_cap,
                 &mut ls,
+                task_lvl,
                 b"name",
                 b"description",
                 TASK_REWARD,
@@ -344,13 +345,17 @@ module loyalty_gm::test_utils {
         test_scenario::next_tx(scenario, user);
         {
             let ls = test_scenario::take_shared<LoyaltySystem>(scenario);
+            let token = test_scenario::take_from_sender<LoyaltyToken>(scenario);
+
 
             loyalty_token::start_task(
                 &mut ls,
+                &mut token,
                 task_id,
                 test_scenario::ctx(scenario)
             );
 
+            test_scenario::return_to_sender(scenario, token);
             test_scenario::return_shared(ls);
         };
     }
