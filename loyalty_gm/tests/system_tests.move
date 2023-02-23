@@ -12,7 +12,7 @@ module loyalty_gm::system_tests {
 
     use loyalty_gm::loyalty_system::{Self, LoyaltySystem, AdminCap};
     use loyalty_gm::system_store::{Self, SystemStore, SYSTEM_STORE};
-    use loyalty_gm::test_utils::{get_ADMIN, get_USER_1, get_LS_NAME, get_LS_DESCRIPTION, get_LS_URL, get_LS_MAX_SUPPLY, get_LS_MAX_LVL, mint_sui, create_system_store, create_loyalty_system, get_TASK_REWARD, add_task, get_verifier, mint_token, start_task, finish_task, remove_task, get_REWARD_POOL_AMT, add_reward, add_fail_reward, remove_reward};
+    use loyalty_gm::test_utils::{get_ADMIN, get_USER_1, get_LS_NAME, get_LS_DESCRIPTION, get_LS_URL, get_LS_MAX_SUPPLY, get_LS_MAX_LVL, mint_sui, create_system_store, create_loyalty_system, get_TASK_REWARD, add_task, get_verifier, mint_token, start_task, finish_task, remove_task, get_REWARD_POOL_AMT, add_reward, add_fail_pool_reward, remove_reward, add_fail_lvl_reward};
 
     // ======== Errors =========
 
@@ -246,11 +246,22 @@ module loyalty_gm::system_tests {
 
     #[test]
     #[expected_failure(abort_code = loyalty_gm::reward_store::EInvalidSupply)]
-    fun fail_add_reward_test() {
+    fun add_fail_pool_reward_test() {
         let scenario_val = create_loyalty_system_test();
         let scenario = &mut scenario_val;
 
-        add_fail_reward(scenario);
+        add_fail_pool_reward(scenario);
+
+        test_scenario::end(scenario_val);
+    }
+
+    #[test]
+    #[expected_failure(abort_code = loyalty_gm::loyalty_system::EInvalidLevel)]
+    fun add_fail_lvl_reward_test() {
+        let scenario_val = create_loyalty_system_test();
+        let scenario = &mut scenario_val;
+
+        add_fail_lvl_reward(scenario);
 
         test_scenario::end(scenario_val);
     }

@@ -49,7 +49,7 @@ module loyalty_gm::token_tests {
 
     #[test]
     #[expected_failure(abort_code = sui::dynamic_field::EFieldAlreadyExists)]
-    fun mint_test_fail() {
+    fun mint_twice_test() {
         let scenario_val = create_loyalty_system_test();
         let scenario = &mut scenario_val;
 

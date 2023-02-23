@@ -89,7 +89,7 @@ module loyalty_gm::test_utils {
         REWARD_SUPPLY
     }
 
-    // ======== Utility functions: Admin
+    // ======== Utility functions: System
 
     public fun mint_sui(scenario: &mut Scenario) {
         let coin = coin::mint_for_testing<SUI>(REWARD_POOL_AMT, test_scenario::ctx(scenario));
@@ -121,6 +121,8 @@ module loyalty_gm::test_utils {
             test_scenario::return_shared(system_store);
         };
     }
+
+    // ======== Utility functions: Tasks
 
     public fun add_task(scenario: &mut Scenario, task_lvl: u64) {
         test_scenario::next_tx(scenario, ADMIN);
@@ -169,6 +171,8 @@ module loyalty_gm::test_utils {
         };
     }
 
+    // ======== Utility functions: Rewards
+
     public fun add_reward(scenario: &mut Scenario) {
         test_scenario::next_tx(scenario, ADMIN);
         {
@@ -195,7 +199,7 @@ module loyalty_gm::test_utils {
         };
     }
 
-    public fun add_fail_reward(scenario: &mut Scenario) {
+    public fun add_fail_pool_reward(scenario: &mut Scenario) {
         test_scenario::next_tx(scenario, ADMIN);
         {
             let ls = test_scenario::take_shared<LoyaltySystem>(scenario);
@@ -212,6 +216,31 @@ module loyalty_gm::test_utils {
                 coins,
                 REWARD_POOL_AMT,
                 99,
+                test_scenario::ctx(scenario)
+            );
+
+            test_scenario::return_shared(ls);
+            test_scenario::return_to_sender(scenario, admin_cap);
+        };
+    }
+
+    public fun add_fail_lvl_reward(scenario: &mut Scenario) {
+        test_scenario::next_tx(scenario, ADMIN);
+        {
+            let ls = test_scenario::take_shared<LoyaltySystem>(scenario);
+            let admin_cap = test_scenario::take_from_sender<AdminCap>(scenario);
+            let coin1 = test_scenario::take_from_sender<Coin<SUI>>(scenario);
+            let coins = vector::empty();
+            vector::push_back(&mut coins, coin1);
+
+            loyalty_system::add_reward(
+                &admin_cap,
+                &mut ls,
+                LS_MAX_LVL + 1,
+                b"reward description",
+                coins,
+                REWARD_POOL_AMT,
+                REWARD_SUPPLY,
                 test_scenario::ctx(scenario)
             );
 
