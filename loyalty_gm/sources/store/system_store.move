@@ -3,12 +3,13 @@
     It is a singleton module that is created when package is published/
 */
 module loyalty_gm::system_store {
-    friend loyalty_gm::loyalty_system;
+    use std::vector;
 
     use sui::object::{Self, UID, ID};
     use sui::transfer;
-    use sui::tx_context::{TxContext};
-    use std::vector::{Self};
+    use sui::tx_context::TxContext;
+
+    friend loyalty_gm::loyalty_system;
 
     // ======== Structs =========
 

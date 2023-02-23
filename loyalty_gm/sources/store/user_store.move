@@ -4,13 +4,13 @@
     Its functions are only accessible by the friend modules.
 */
 module loyalty_gm::user_store {
+    use sui::object::ID;
+    use sui::table::{Self, Table};
+    use sui::tx_context::{Self, TxContext};
+    use sui::vec_set::{Self, VecSet};
+
     friend loyalty_gm::loyalty_system;
     friend loyalty_gm::loyalty_token;
-
-    use sui::object::{ID};
-    use sui::tx_context::{Self, TxContext};
-    use sui::table::{Self, Table};
-    use sui::vec_set::{Self, VecSet};
 
     // ======== Constants =========
 

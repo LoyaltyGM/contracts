@@ -1,16 +1,16 @@
 #[test_only]
 module loyalty_gm::test_utils {
-    use std::vector::{Self};
+    use std::vector;
 
-    use sui::test_scenario::{Self, Scenario};
-    use sui::object::{Self};
     use sui::coin::{Self, Coin};
+    use sui::object;
     use sui::sui::SUI;
+    use sui::test_scenario::{Self, Scenario};
     use sui::transfer;
 
     use loyalty_gm::loyalty_system::{Self, LoyaltySystem, AdminCap, VerifierCap};
-    use loyalty_gm::system_store::{Self, SystemStore, SYSTEM_STORE};
     use loyalty_gm::loyalty_token::{Self, LoyaltyToken};
+    use loyalty_gm::system_store::{Self, SystemStore, SYSTEM_STORE};
 
     // ======== Constants =========
 

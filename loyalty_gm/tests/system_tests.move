@@ -1,47 +1,14 @@
 #[test_only]
 module loyalty_gm::system_tests {
-    // use std::vector::{length};
-    // use std::string::{Self, String};
+    use std::string;
 
-    // use sui::object::{Self, UID, ID};
-    // use sui::transfer;
-    // use sui::url::{Self, Url};
-    // use sui::tx_context::{Self, TxContext};
-    // use sui::event::{emit};
-    // use sui::vec_map::{Self, VecMap};
-    // use sui::table::{Table};
-    // use sui::dynamic_object_field as dof;
-    // use sui::coin::{Coin};
-    // use sui::sui::SUI;
-    // use sui::test_scenario::{Self, Scenario};
-
-    // use loyalty_gm::loyalty_system::{Self, LoyaltySystem};
-    // use loyalty_gm::system_store::{Self, SystemStore, SYSTEM_STORE};
-    // use loyalty_gm::user_store::{Self, User};
-    // use loyalty_gm::reward_store::{Self, Reward};
-    // use loyalty_gm::task_store::{Self, Task};
-
-    // =================
-    use std::string::{Self};
-
+    use sui::object;
     use sui::test_scenario::{Self, Scenario};
-    use sui::url::{Self};
-    use sui::object::{Self};
+    use sui::url;
 
     use loyalty_gm::loyalty_system::{Self, LoyaltySystem, AdminCap};
     use loyalty_gm::system_store::{Self, SystemStore, SYSTEM_STORE};
-    use loyalty_gm::test_utils::{
-    get_ADMIN,
-    get_USER_1,
-    get_LS_NAME,
-    get_LS_DESCRIPTION,
-    get_LS_URL,
-    get_LS_MAX_SUPPLY,
-    get_LS_MAX_LVL,
-    mint_sui,
-    create_system_store,
-    create_loyalty_system,
-    };
+    use loyalty_gm::test_utils::{get_ADMIN, get_USER_1, get_LS_NAME, get_LS_DESCRIPTION, get_LS_URL, get_LS_MAX_SUPPLY, get_LS_MAX_LVL, mint_sui, create_system_store, create_loyalty_system};
 
     // ======== Errors =========
 

@@ -2,39 +2,16 @@
 module loyalty_gm::reward_tests {
     use std::debug::print;
 
-    use sui::test_scenario::{Self, Scenario};
-    use sui::vec_map::{Self};
     use sui::coin::{Self, Coin};
     use sui::sui::SUI;
+    use sui::test_scenario::{Self, Scenario};
+    use sui::vec_map;
 
     use loyalty_gm::loyalty_system::{Self, LoyaltySystem};
-    use loyalty_gm::system_tests::{
-    create_loyalty_system_test,
-    };
-    use loyalty_gm::test_utils::{
-    get_ADMIN,
-    add_reward,
-    remove_reward,
-    get_USER_1,
-    get_REWARD_LVL,
-    claim_reward,
-    add_fail_reward,
-    add_single_reward,
-    finish_task,
-    start_task,
-    get_REWARD_POOL_AMT,
-    get_REWARD_SUPPLY,
-    mint_token,
-    get_verifier,
-    get_USER_2,
-    claim_xp,
-    };
-    use loyalty_gm::task_tests::{
-    add_task_test,
-    };
-    use loyalty_gm::token_tests::{
-    claim_xp_test
-    };
+    use loyalty_gm::system_tests::create_loyalty_system_test;
+    use loyalty_gm::task_tests::add_task_test;
+    use loyalty_gm::test_utils::{get_ADMIN, add_reward, remove_reward, get_USER_1, get_REWARD_LVL, claim_reward, add_fail_reward, add_single_reward, finish_task, start_task, get_REWARD_POOL_AMT, get_REWARD_SUPPLY, mint_token, get_verifier, get_USER_2, claim_xp};
+    use loyalty_gm::token_tests::claim_xp_test;
 
     // ======== Errors =========
 

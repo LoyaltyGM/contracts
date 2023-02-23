@@ -6,16 +6,16 @@
 module loyalty_gm::loyalty_token {
     use std::string::{Self, String};
 
+    use sui::event::emit;
+    use sui::math;
     use sui::object::{Self, UID, ID};
     use sui::transfer;
-    use sui::url::{Url};
     use sui::tx_context::{Self, TxContext};
-    use sui::event::{emit};
-    use sui::math::{Self};
+    use sui::url::Url;
 
     use loyalty_gm::loyalty_system::{Self, LoyaltySystem};
-    use loyalty_gm::user_store::{Self};
-    use loyalty_gm::reward_store::{Self};
+    use loyalty_gm::reward_store;
+    use loyalty_gm::user_store;
 
     // ======== Constants =========
 

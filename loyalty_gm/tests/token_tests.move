@@ -6,19 +6,10 @@ module loyalty_gm::token_tests {
 
     use loyalty_gm::loyalty_system::{Self, LoyaltySystem};
     use loyalty_gm::loyalty_token::{Self, LoyaltyToken};
-    use loyalty_gm::user_store::{Self};
-    use loyalty_gm::test_utils::{mint_token};
-    use loyalty_gm::system_tests::{
-    create_loyalty_system_test,
-    };
-    use loyalty_gm::task_tests::{
-    finish_task_test,
-    };
-    use loyalty_gm::test_utils::{
-    get_USER_1,
-    get_TASK_REWARD,
-    claim_xp
-    };
+    use loyalty_gm::system_tests::create_loyalty_system_test;
+    use loyalty_gm::task_tests::finish_task_test;
+    use loyalty_gm::test_utils::{mint_token, get_USER_1, get_TASK_REWARD, claim_xp};
+    use loyalty_gm::user_store;
 
     // ======== Errors =========
 

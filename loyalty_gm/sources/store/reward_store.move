@@ -4,23 +4,24 @@
     Its functions are only accessible by the friend modules.
 */
 module loyalty_gm::reward_store {
+    use std::string::{Self, String};
+    use std::vector;
+
+    use sui::balance::{Self, Balance};
+    use sui::coin::{Self, Coin};
+    use sui::dynamic_object_field as dof;
+    use sui::event::emit;
+    use sui::object::{Self, UID, ID};
+    use sui::pay;
+    use sui::sui::SUI;
+    use sui::table;
+    use sui::transfer;
+    use sui::tx_context::{Self, TxContext};
+    use sui::vec_map::{Self, VecMap};
+
     friend loyalty_gm::loyalty_system;
     friend loyalty_gm::loyalty_token;
 
-    use std::string::{Self, String};
-
-    use sui::object::{Self, UID, ID};
-    use sui::tx_context::{Self, TxContext};
-    use sui::vec_map::{Self, VecMap};
-    use sui::transfer;
-    use sui::coin::{Self, Coin};
-    use sui::sui::SUI;
-    use sui::table::{Self};
-    use sui::dynamic_object_field as dof;
-    use sui::balance::{Self, Balance};
-    use sui::event::{emit};
-    use sui::pay::{Self};
-    use std::vector::{Self};
     // ======== Constants =========
 
     const INITIAL_XP: u64 = 0;
@@ -88,12 +89,12 @@ module loyalty_gm::reward_store {
         pay::join_vec(&mut coin, coins);
         let received_coin = coin::split(&mut coin, reward_pool, ctx);
 
-        if(coin::value(&coin) == 0) {
+        if (coin::value(&coin) == 0) {
             coin::destroy_zero(coin);
         } else {
             pay::keep(coin, ctx);
         };
-        
+
         let balance = coin::into_balance(received_coin);
         let balance_val = balance::value(&balance);
         assert!(balance_val % reward_supply == 0, EInvalidSupply);

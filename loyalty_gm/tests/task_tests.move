@@ -2,25 +2,13 @@
 module loyalty_gm::task_tests {
     use std::debug::print;
 
+    use sui::object;
     use sui::test_scenario::{Self, Scenario};
-    use sui::vec_map::{Self};
-    use sui::object::{Self};
+    use sui::vec_map;
 
     use loyalty_gm::loyalty_system::{Self, LoyaltySystem};
-    use loyalty_gm::system_tests::{
-    create_loyalty_system_test,
-    };
-    use loyalty_gm::test_utils::{
-    get_ADMIN,
-    get_USER_1,
-    get_TASK_REWARD,
-    add_task,
-    get_verifier,
-    mint_token,
-    start_task,
-    finish_task,
-    remove_task,
-    };
+    use loyalty_gm::system_tests::create_loyalty_system_test;
+    use loyalty_gm::test_utils::{get_ADMIN, get_USER_1, get_TASK_REWARD, add_task, get_verifier, mint_token, start_task, finish_task, remove_task};
 
     // ======== Errors =========
 

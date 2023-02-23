@@ -4,16 +4,16 @@
     Its functions are only accessible by the friend modules.
 */
 module loyalty_gm::task_store {
+    use std::string::{Self, String};
+    use std::vector;
+
+    use sui::event::emit;
+    use sui::object::{Self, ID};
+    use sui::tx_context::TxContext;
+    use sui::vec_map::{Self, VecMap};
+
     friend loyalty_gm::loyalty_system;
     friend loyalty_gm::loyalty_token;
-
-    use std::string::{Self, String};
-    use std::vector::{Self};
-
-    use sui::object::{Self, ID};
-    use sui::vec_map::{Self, VecMap};
-    use sui::tx_context::{TxContext};
-    use sui::event::{emit};
 
     // ======== Constants =========
 

@@ -4,26 +4,26 @@
     Module for creating and managing loyalty systems by the admin and verifying tasks by the verifier.
 */
 module loyalty_gm::loyalty_system {
-    friend loyalty_gm::loyalty_token;
-
-    use std::vector::{length};
     use std::string::{Self, String};
-    use sui::object::{Self, UID, ID};
-    use sui::transfer;
-    use sui::url::{Self, Url};
-    use sui::tx_context::{Self, TxContext};
-    use sui::event::{emit};
-    use sui::vec_map::{Self, VecMap};
-    use sui::table::{Table};
+    use std::vector::length;
+
+    use sui::coin::Coin;
     use sui::dynamic_object_field as dof;
-    use sui::coin::{Coin};
+    use sui::event::emit;
+    use sui::object::{Self, UID, ID};
     use sui::sui::SUI;
+    use sui::table::Table;
+    use sui::transfer;
+    use sui::tx_context::{Self, TxContext};
+    use sui::url::{Self, Url};
+    use sui::vec_map::{Self, VecMap};
 
-    use loyalty_gm::system_store::{Self, SystemStore, SYSTEM_STORE};
-    use loyalty_gm::user_store::{Self, User};
     use loyalty_gm::reward_store::{Self, Reward};
+    use loyalty_gm::system_store::{Self, SystemStore, SYSTEM_STORE};
     use loyalty_gm::task_store::{Self, Task};
+    use loyalty_gm::user_store::{Self, User};
 
+    friend loyalty_gm::loyalty_token;
 
     // ======== Constants =========
     const USER_STORE_KEY: vector<u8> = b"user_store";
@@ -44,8 +44,8 @@ module loyalty_gm::loyalty_system {
     /**
         Admin capability to manage the loyalty system.
         Created separately for each system.
-    */ 
-    struct AdminCap has key, store { 
+    */
+    struct AdminCap has key, store {
         id: UID,
         name: String,
         description: String,
@@ -56,11 +56,11 @@ module loyalty_gm::loyalty_system {
     /**
         Verifier capability to finish tasks.
         Created once per package.
-    */ 
+    */
     struct VerifierCap has key, store {
         id: UID,
     }
-    
+
     /**
         Loyalty system struct.
         Contains all the information about the loyalty system.
@@ -90,7 +90,7 @@ module loyalty_gm::loyalty_system {
             --dynamic fields--
             /// User store of the loyalty system user_address -> User
             user_store: Table<address, User>,
-        */ 
+        */
     }
 
     // ======== Events =========
@@ -121,10 +121,10 @@ module loyalty_gm::loyalty_system {
         Create a new loyalty system.
         Transfer to the creator AdminCap.
         The creator of the system will be the admin of the system.
-    */ 
+    */
     public entry fun create_loyalty_system(
-        name: vector<u8>, 
-        description: vector<u8>, 
+        name: vector<u8>,
+        description: vector<u8>,
         url: vector<u8>,
         max_supply: u64,
         max_lvl: u64,
@@ -173,24 +173,28 @@ module loyalty_gm::loyalty_system {
 
     // ======== Admin Functions: Update
 
-    public entry fun update_name(admin_cap: &AdminCap, loyalty_system: &mut LoyaltySystem, new_name: vector<u8> ){
+    public entry fun update_name(admin_cap: &AdminCap, loyalty_system: &mut LoyaltySystem, new_name: vector<u8>) {
         assert!(length(&new_name) <= MAX_NAME_LENGTH, ETextOverflow);
         check_admin(admin_cap, loyalty_system);
         loyalty_system.name = string::utf8(new_name);
     }
 
-    public entry fun update_description(admin_cap: &AdminCap, loyalty_system: &mut LoyaltySystem, new_description: vector<u8> ){
+    public entry fun update_description(
+        admin_cap: &AdminCap,
+        loyalty_system: &mut LoyaltySystem,
+        new_description: vector<u8>
+    ) {
         assert!(length(&new_description) <= MAX_DESCRIPTION_LENGTH, ETextOverflow);
         check_admin(admin_cap, loyalty_system);
         loyalty_system.description = string::utf8(new_description);
     }
 
-    public entry fun update_url(admin_cap: &AdminCap, loyalty_system: &mut LoyaltySystem, new_url: vector<u8> ){
+    public entry fun update_url(admin_cap: &AdminCap, loyalty_system: &mut LoyaltySystem, new_url: vector<u8>) {
         check_admin(admin_cap, loyalty_system);
         loyalty_system.url = url::new_unsafe_from_bytes(new_url);
     }
 
-    public entry fun update_max_supply(admin_cap: &AdminCap, loyalty_system: &mut LoyaltySystem, new_max_supply: u64 ){
+    public entry fun update_max_supply(admin_cap: &AdminCap, loyalty_system: &mut LoyaltySystem, new_max_supply: u64) {
         check_admin(admin_cap, loyalty_system);
         loyalty_system.max_supply = new_max_supply;
     }
@@ -200,11 +204,11 @@ module loyalty_gm::loyalty_system {
     /**
         Add a new reward to the loyalty system.
         Users can claim rewards by reaching a certain level.
-    */ 
+    */
     public entry fun add_reward(
-        admin_cap: &AdminCap, 
+        admin_cap: &AdminCap,
         loyalty_system: &mut LoyaltySystem,
-        level: u64, 
+        level: u64,
         description: vector<u8>,
         coins: vector<Coin<SUI>>,
         reward_pool: u64,
@@ -215,8 +219,8 @@ module loyalty_gm::loyalty_system {
         assert!(level <= loyalty_system.max_lvl, EInvalidLevel);
 
         reward_store::add_reward(
-            &mut loyalty_system.rewards, 
-            level, 
+            &mut loyalty_system.rewards,
+            level,
             description,
             coins,
             reward_pool,
@@ -224,11 +228,16 @@ module loyalty_gm::loyalty_system {
             ctx
         );
     }
-    
+
     /**
         Remove a reward from the loyalty system.
     */
-    public entry fun remove_reward(admin_cap: &AdminCap, loyalty_system: &mut LoyaltySystem, level: u64, ctx: &mut TxContext) {
+    public entry fun remove_reward(
+        admin_cap: &AdminCap,
+        loyalty_system: &mut LoyaltySystem,
+        level: u64,
+        ctx: &mut TxContext
+    ) {
         check_admin(admin_cap, loyalty_system);
 
         reward_store::remove_reward(&mut loyalty_system.rewards, level, ctx);
@@ -241,11 +250,11 @@ module loyalty_gm::loyalty_system {
         Users can complete tasks to earn XP.
     */
     public entry fun add_task(
-        admin_cap: &AdminCap, 
+        admin_cap: &AdminCap,
         loyalty_system: &mut LoyaltySystem,
-        name: vector<u8>, 
-        description: vector<u8>, 
-        reward_xp: u64, 
+        name: vector<u8>,
+        description: vector<u8>,
+        reward_xp: u64,
         package_id: ID,
         module_name: vector<u8>,
         function_name: vector<u8>,
@@ -255,9 +264,9 @@ module loyalty_gm::loyalty_system {
         check_admin(admin_cap, loyalty_system);
 
         task_store::add_task(
-            &mut loyalty_system.tasks, 
-            name, 
-            description, 
+            &mut loyalty_system.tasks,
+            name,
+            description,
             reward_xp,
             package_id,
             module_name,
@@ -271,8 +280,8 @@ module loyalty_gm::loyalty_system {
         Remove a task from the loyalty system.
     */
     public entry fun remove_task(
-        admin_cap: &AdminCap, 
-        loyalty_system: &mut LoyaltySystem, 
+        admin_cap: &AdminCap,
+        loyalty_system: &mut LoyaltySystem,
         task_id: ID,
         _: &mut TxContext
     ) {
@@ -289,8 +298,8 @@ module loyalty_gm::loyalty_system {
     */
     public entry fun finish_task(
         _: &VerifierCap,
-        loyalty_system: &mut LoyaltySystem, 
-        task_id: ID, 
+        loyalty_system: &mut LoyaltySystem,
+        task_id: ID,
         user: address
     ) {
         let reward_xp = task_store::get_task_reward(&loyalty_system.tasks, &task_id);
@@ -307,16 +316,16 @@ module loyalty_gm::loyalty_system {
 
     // ======= Public functions: Friends
 
-    public(friend) fun get_mut_user_store(loyalty_system: &mut LoyaltySystem): &mut Table<address, User>{
+    public(friend) fun get_mut_user_store(loyalty_system: &mut LoyaltySystem): &mut Table<address, User> {
         dof::borrow_mut(&mut loyalty_system.id, USER_STORE_KEY)
     }
 
-    public(friend) fun increment_total_minted(loyalty_system: &mut LoyaltySystem){
+    public(friend) fun increment_total_minted(loyalty_system: &mut LoyaltySystem) {
         assert!(get_total_minted(loyalty_system) <= get_max_supply(loyalty_system), EMaxSupplyReached);
         loyalty_system.total_minted = loyalty_system.total_minted + 1;
     }
 
-    public(friend) fun get_mut_reward(loyalty_system: &mut LoyaltySystem, lvl: u64): &mut Reward{
+    public(friend) fun get_mut_reward(loyalty_system: &mut LoyaltySystem, lvl: u64): &mut Reward {
         vec_map::get_mut(&mut loyalty_system.rewards, &lvl)
     }
 
@@ -326,10 +335,10 @@ module loyalty_gm::loyalty_system {
     */
     public fun get_name(loyalty_system: &LoyaltySystem): &string::String {
         &loyalty_system.name
-    }    
-    
+    }
+
     public fun get_max_supply(loyalty_system: &LoyaltySystem): u64 {
-        loyalty_system.max_supply 
+        loyalty_system.max_supply
     }
 
     public fun get_total_minted(loyalty_system: &LoyaltySystem): u64 {
