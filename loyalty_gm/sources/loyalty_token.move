@@ -15,6 +15,7 @@ module loyalty_gm::loyalty_token {
 
     use loyalty_gm::loyalty_system::{Self, LoyaltySystem};
     use loyalty_gm::reward_store;
+    use loyalty_gm::task_store;
     use loyalty_gm::user_store;
 
     // ======== Constants =========
@@ -146,7 +147,16 @@ module loyalty_gm::loyalty_token {
         User function to start task.
         Verifier cant finish task if user didnt start it.
     */
-    public entry fun start_task(loyalty_system: &mut LoyaltySystem, task_id: ID, ctx: &mut TxContext) {
+    public entry fun start_task(
+        loyalty_system: &mut LoyaltySystem,
+        token: &LoyaltyToken,
+        task_id: ID,
+        ctx: &mut TxContext
+    ) {
+        assert!(
+            token.lvl >= task_store::get_task_lvl(loyalty_system::get_tasks(loyalty_system), &task_id),
+            EInvalidLvl
+        );
         user_store::start_task(loyalty_system::get_mut_user_store(loyalty_system), task_id, tx_context::sender(ctx))
     }
 

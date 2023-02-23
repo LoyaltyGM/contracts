@@ -34,6 +34,7 @@ module loyalty_gm::task_store {
     */
     struct Task has store, drop {
         id: ID,
+        lvl: u64,
         name: String,
         description: String,
         /// The amount of XP that the user will receive upon completing the task
@@ -77,6 +78,7 @@ module loyalty_gm::task_store {
     */
     public(friend) fun add_task(
         store: &mut VecMap<ID, Task>,
+        lvl: u64,
         name: vector<u8>,
         description: vector<u8>,
         reward_exp: u64,
@@ -94,6 +96,7 @@ module loyalty_gm::task_store {
 
         let task = Task {
             id,
+            lvl,
             name: string::utf8(name),
             description: string::utf8(description),
             reward_exp,
@@ -116,6 +119,13 @@ module loyalty_gm::task_store {
     */
     public(friend) fun remove_task(store: &mut VecMap<ID, Task>, task_id: ID) {
         vec_map::remove(store, &task_id);
+    }
+
+    /**
+        Returns the task ID for the given task name.
+    */
+    public fun get_task_lvl(store: &VecMap<ID, Task>, task_id: &ID): u64 {
+        vec_map::get(store, task_id).lvl
     }
 
     /**

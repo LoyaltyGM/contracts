@@ -252,6 +252,7 @@ module loyalty_gm::loyalty_system {
     public entry fun add_task(
         admin_cap: &AdminCap,
         loyalty_system: &mut LoyaltySystem,
+        lvl: u64,
         name: vector<u8>,
         description: vector<u8>,
         reward_xp: u64,
@@ -265,6 +266,7 @@ module loyalty_gm::loyalty_system {
 
         task_store::add_task(
             &mut loyalty_system.tasks,
+            lvl,
             name,
             description,
             reward_xp,
@@ -355,6 +357,10 @@ module loyalty_gm::loyalty_system {
 
     public fun get_user_store(loyalty_system: &LoyaltySystem): &Table<address, User> {
         dof::borrow(&loyalty_system.id, USER_STORE_KEY)
+    }
+
+    public fun get_user(loyalty_system: &LoyaltySystem, user: address): &User {
+        user_store::get_user(get_user_store(loyalty_system), user)
     }
 
     public fun get_max_lvl(loyalty_system: &LoyaltySystem): u64 {
